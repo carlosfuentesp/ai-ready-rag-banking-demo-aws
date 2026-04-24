@@ -77,14 +77,16 @@ python scripts/generate_synthetic_data.py
 ```bash
 cd infra/terraform
 terraform init
-terraform apply \
-  -var='aws_region=us-east-1' \
-  -var='enable_static_demo_site=true' \
-  -var='enable_bedrock_guardrail=true' \
-  -var='enable_graphrag=true'
+terraform apply
 ```
 
-Cuando termines la prueba, destruye todos los recursos desde `infra/terraform` con `terraform destroy` usando las mismas variables del `apply`.
+Cuando termines la prueba, destruye todos los recursos desde `infra/terraform`:
+
+```bash
+terraform destroy
+```
+
+Los defaults están configurados para desplegar la demo completa en `us-east-1`: sitio estático, Basic RAG, AI-Ready GraphRAG sobre Neptune Analytics, guardrail, datos sintéticos en DynamoDB e ingestion jobs administrados por Terraform.
 
 El sitio estático publica tres vistas: comparación, RAG común y AI-Ready GraphRAG + Agent. Las dos vistas tienen pregunta editable y consultan una API real en AWS.
 

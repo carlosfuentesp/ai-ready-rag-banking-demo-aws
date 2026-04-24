@@ -91,12 +91,6 @@ resource "aws_bedrockagent_knowledge_base" "graphrag" {
 
     vector_knowledge_base_configuration {
       embedding_model_arn = var.embedding_model_arn
-
-      embedding_model_configuration {
-        bedrock_embedding_model_configuration {
-          dimensions = var.embedding_dimension
-        }
-      }
     }
   }
 

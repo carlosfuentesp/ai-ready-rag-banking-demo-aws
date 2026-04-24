@@ -1,30 +1,30 @@
 resource "aws_opensearchserverless_security_policy" "encryption" {
-  name = "${local.name_prefix}-enc"
+  name = local.opensearch_enc_name
   type = "encryption"
 
   policy = jsonencode({
     Rules = [{
       ResourceType = "collection"
-      Resource     = ["collection/${local.name_prefix}-vector"]
+      Resource     = ["collection/${local.opensearch_name}"]
     }]
     AWSOwnedKey = true
   })
 }
 
 resource "aws_opensearchserverless_security_policy" "network" {
-  name = "${local.name_prefix}-net"
+  name = local.opensearch_net_name
   type = "network"
 
   policy = jsonencode([
     {
       Rules = [
         {
-          ResourceType = "collection"
-          Resource     = ["collection/${local.name_prefix}-vector"]
+          ResourceType = "dashboard"
+          Resource     = ["collection/${local.opensearch_name}"]
         },
         {
-          ResourceType = "dashboard"
-          Resource     = ["collection/${local.name_prefix}-vector"]
+          ResourceType = "collection"
+          Resource     = ["collection/${local.opensearch_name}"]
         }
       ]
       AllowFromPublic = true
@@ -33,7 +33,7 @@ resource "aws_opensearchserverless_security_policy" "network" {
 }
 
 resource "aws_opensearchserverless_access_policy" "access" {
-  name = "${local.name_prefix}-access"
+  name = local.opensearch_acc_name
   type = "data"
 
   policy = jsonencode([
@@ -41,12 +41,12 @@ resource "aws_opensearchserverless_access_policy" "access" {
       Rules = [
         {
           ResourceType = "collection"
-          Resource     = ["collection/${local.name_prefix}-vector"]
+          Resource     = ["collection/${local.opensearch_name}"]
           Permission   = ["aoss:*"]
         },
         {
           ResourceType = "index"
-          Resource     = ["index/${local.name_prefix}-vector/*"]
+          Resource     = ["index/${local.opensearch_name}/*"]
           Permission   = ["aoss:*"]
         }
       ]
@@ -59,7 +59,7 @@ resource "aws_opensearchserverless_access_policy" "access" {
 }
 
 resource "aws_opensearchserverless_collection" "vector" {
-  name = "${local.name_prefix}-vector"
+  name = local.opensearch_name
   type = "VECTORSEARCH"
 
   depends_on = [

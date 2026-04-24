@@ -5,30 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Banco Demo — Iniciar sesión</title>
     <link rel="stylesheet" href="styles.css" />
-    <style>
-      body { display: flex; flex-direction: column; min-height: 100vh; justify-content: center; align-items: center; gap: 24px; }
-      .login-box { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 36px 32px; width: 100%; max-width: 400px; box-shadow: var(--shadow); }
-      .login-box h1 { font-size: 20px; margin-bottom: 4px; }
-      .login-box p  { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
-      .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-      .field label { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-      .field input { padding: 9px 12px; border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: 14px; }
-      .field input:focus { outline: 2px solid var(--nav-bg); outline-offset: 1px; }
-      .btn-login { width: 100%; padding: 10px; border: none; border-radius: 6px; background: var(--nav-bg); color: #fff; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
-      .btn-login:hover { opacity: .88; }
-      .error-msg { color: var(--bad); font-size: 13px; min-height: 18px; }
-      .demo-users { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; width: 100%; max-width: 400px; }
-      .demo-users h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 10px; }
-      .demo-user { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; cursor: pointer; }
-      .demo-user:last-child { border-bottom: none; }
-      .demo-user:hover { background: none; opacity: .75; }
-      .demo-user .du-name { font-weight: 600; }
-      .demo-user .du-meta { color: var(--muted); font-size: 12px; }
-      .demo-user .du-cred { font-family: ui-monospace, monospace; font-size: 12px; color: var(--muted); }
-      .bank-logo { font-size: 22px; font-weight: 800; color: var(--nav-bg); letter-spacing: -.5px; }
-    </style>
   </head>
-  <body>
+  <body class="login-page">
     <div class="bank-logo">🏦 Banco Sintético Demo</div>
 
     <div class="login-box">

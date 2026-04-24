@@ -6,10 +6,10 @@ resource "random_id" "suffix" {
 }
 
 locals {
-  name_prefix         = "${var.project_name}-${random_id.suffix.hex}"
-  data_root           = abspath("${path.module}/${var.data_root_path}")
-  basic_vector_bucket   = substr(replace(lower("${var.project_name}-${random_id.suffix.hex}-basic-vectors"), "_", "-"), 0, 63)
-  basic_vector_index    = "basic-rag"
+  name_prefix            = "${var.project_name}-${random_id.suffix.hex}"
+  data_root              = abspath("${path.module}/${var.data_root_path}")
+  basic_vector_bucket    = substr(replace(lower("${var.project_name}-${random_id.suffix.hex}-basic-vectors"), "_", "-"), 0, 63)
+  basic_vector_index     = "basic-rag"
   graphrag_vector_bucket = substr(replace(lower("${var.project_name}-${random_id.suffix.hex}-graphrag-vectors"), "_", "-"), 0, 63)
   graphrag_vector_index  = "graphrag"
 

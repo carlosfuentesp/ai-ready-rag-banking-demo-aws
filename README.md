@@ -60,7 +60,7 @@ El proyecto compara:
 - Credenciales AWS disponibles para Terraform
 - Python 3.11+
 - Acceso a modelos de Amazon Bedrock en la región elegida
-- Permisos para S3, IAM, DynamoDB, Lambda, Bedrock, OpenSearch Serverless, DataZone y, opcionalmente, Neptune Analytics/GraphRAG
+- Permisos para S3, IAM, DynamoDB, Lambda, Bedrock, DataZone y, opcionalmente, Neptune Analytics/GraphRAG
 
 ## Preparar datos sintéticos
 
@@ -84,13 +84,13 @@ terraform apply \
   -var='enable_graphrag=true'
 ```
 
-Guía completa de prueba y limpieza: [docs/aws_full_test.md](docs/aws_full_test.md).
+Cuando termines la prueba, destruye todos los recursos desde `infra/terraform` con `terraform destroy` usando las mismas variables del `apply`.
 
 El sitio estático publica tres vistas: comparación, RAG común y AI-Ready GraphRAG + Agent. Las dos vistas tienen pregunta editable y consultan una API real en AWS.
 
 ## Nota sobre Terraform
 
-Terraform aprovisiona S3, DynamoDB, Lambda, API Gateway, IAM, S3 Vectors, OpenSearch Serverless, Bedrock Guardrail, Bedrock Knowledge Bases, Neptune Analytics, sitio estático opcional y DataZone opcional. La creación y destrucción de recursos persistentes queda en el estado de Terraform.
+Terraform aprovisiona S3, DynamoDB, Lambda, API Gateway, IAM, S3 Vectors, Bedrock Guardrail, Bedrock Knowledge Bases, Neptune Analytics, sitio estático opcional y DataZone opcional. La creación y destrucción de recursos persistentes queda en el estado de Terraform.
 
 ## Flujo de demo
 

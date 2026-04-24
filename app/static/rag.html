@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title id="page-title">RAG Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="index.html">← Comparación</a>
+        <a href="rag.html?mode=basic" id="nav-basic">RAG Común</a>
+        <a href="rag.html?mode=ai-ready" id="nav-aiready">AI-Ready RAG</a>
+        <span class="nav-spacer"></span>
+        <span id="session-badge" class="session-badge hidden"></span>
+        <button id="logout-btn" class="btn-logout hidden" type="button">Cerrar sesión</button>
+      </nav>
+      <div class="page-title" id="page-header"></div>
+    </header>
+
+    <main>
+      <div id="session-context" class="session-context hidden"></div>
+      <div id="mode-warning"></div>
+
+      <section class="query-card">
+        <label for="question">Pregunta al sistema</label>
+        <div class="presets">
+          <span class="presets-label">Ejemplos:</span>
+          <button class="preset-btn" type="button" data-q="1">① Cargo online no reconocido</button>
+          <button class="preset-btn" type="button" data-q="2">② Retiro ATM en otra ciudad</button>
+          <button class="preset-btn" type="button" data-q="3">③ Doble cobro en restaurante</button>
+        </div>
+        <textarea id="question" rows="4">No reconozco el cargo TX-991 por USD 326.40 de ECOMMERCE_X en mi tarjeta de crédito. ¿Qué pasos debo seguir y pueden bloquear mi tarjeta?</textarea>
+        <button class="btn-query" id="query-btn" type="button">Consultar</button>
+      </section>
+
+      <div id="results" class="results-area hidden"></div>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="demo.js"></script>
+  </body>
+</html>

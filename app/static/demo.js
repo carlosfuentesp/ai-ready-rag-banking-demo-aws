@@ -10,7 +10,6 @@ function md(raw) {
   if (!raw) return "";
 
   function inline(text) {
-    // escape first, then apply inline formatting
     return esc(text)
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
       .replace(/\*(.+?)\*/g,     "<em>$1</em>")
@@ -19,8 +18,8 @@ function md(raw) {
 
   const lines = raw.split("\n");
   const out = [];
-  let listTag = null;   // 'ul' | 'ol' | null
-  let tableState = ""; // '' | 'head' | 'body'
+  let listTag = null;
+  let tableState = "";
 
   function closeList() {
     if (listTag) { out.push(`</${listTag}>`); listTag = null; }
@@ -34,16 +33,11 @@ function md(raw) {
     const line = lines[i];
     const t = line.trim();
 
-    // ── TABLE ──
     if (t.startsWith("|") && t.endsWith("|")) {
       closeList();
       const isSep = /^\|[\s\-:|]+\|$/.test(t);
       if (isSep) {
-        // separator: close thead, open tbody
-        if (tableState === "head") {
-          out.push("</thead><tbody>");
-          tableState = "body";
-        }
+        if (tableState === "head") { out.push("</thead><tbody>"); tableState = "body"; }
         continue;
       }
       const cells = t.slice(1, -1).split("|").map(c => c.trim());
@@ -57,39 +51,25 @@ function md(raw) {
       continue;
     }
 
-    // non-table line → close table
     if (tableState) closeTable();
 
-    // ── HR ──
-    if (/^---+$/.test(t) || /^\*\*\*+$/.test(t)) {
-      closeList();
-      out.push("<hr>");
-      continue;
-    }
-
-    // ── HEADERS ──
+    if (/^---+$/.test(t) || /^\*\*\*+$/.test(t)) { closeList(); out.push("<hr>"); continue; }
     if (t.startsWith("### ")) { closeList(); out.push(`<h3>${inline(t.slice(4))}</h3>`); continue; }
     if (t.startsWith("## "))  { closeList(); out.push(`<h2>${inline(t.slice(3))}</h2>`); continue; }
     if (t.startsWith("# "))   { closeList(); out.push(`<h1>${inline(t.slice(2))}</h1>`); continue; }
 
-    // ── UNORDERED LIST ──
     if (/^[-*✓✅⚠❌] /.test(t)) {
       if (listTag !== "ul") { closeList(); out.push("<ul>"); listTag = "ul"; }
       out.push(`<li>${inline(t.replace(/^[-*✓✅⚠❌]\s/, ""))}</li>`);
       continue;
     }
-
-    // ── ORDERED LIST ──
     if (/^\d+[.)]\s/.test(t)) {
       if (listTag !== "ol") { closeList(); out.push("<ol>"); listTag = "ol"; }
       out.push(`<li>${inline(t.replace(/^\d+[.)]\s/, ""))}</li>`);
       continue;
     }
 
-    // ── BLANK LINE ── skip; CSS margins handle spacing
     if (t === "") { closeList(); continue; }
-
-    // ── PARAGRAPH ──
     closeList();
     out.push(`<p>${inline(t)}</p>`);
   }
@@ -99,10 +79,8 @@ function md(raw) {
   return out.join("\n");
 }
 
-/* ── BASIC RAG RENDERER ── */
+/* ── RENDERERS ── */
 function renderBasic(payload) {
-  const sources = payload.sources || [];
-
   return `
     <div class="alert alert-bad">
       <strong>⚠ Sin contexto estructurado — respuesta desde PDFs genéricos</strong>
@@ -113,44 +91,27 @@ function renderBasic(payload) {
         <li>Chunking fijo puede fragmentar conceptos clave entre chunks.</li>
       </ul>
     </div>
-
     <div class="card">
-      <div class="card-header">
-        <span class="icon">💬</span>
-        <h2>Respuesta generada</h2>
-      </div>
+      <div class="card-header"><span class="icon">💬</span><h2>Respuesta generada</h2></div>
       <div class="answer-text md-body">${md(payload.answer)}</div>
     </div>
-
-    ${renderSources(sources)}
+    ${renderSources(payload.sources)}
   `;
 }
 
-/* ── AI-READY RAG RENDERER ── */
 function renderAiReady(payload) {
-  const data    = payload.structured_data || {};
-  const sources = payload.sources || [];
-
   return `
-    ${renderStructuredData(data)}
-
+    ${renderStructuredData(payload.structured_data || {})}
     <div class="card">
-      <div class="card-header">
-        <span class="icon">💬</span>
-        <h2>Respuesta generada con contexto real</h2>
-      </div>
+      <div class="card-header"><span class="icon">💬</span><h2>Respuesta generada con contexto real</h2></div>
       <div class="answer-text md-body">${md(payload.answer)}</div>
     </div>
-
-    ${renderSources(sources)}
+    ${renderSources(payload.sources)}
   `;
 }
 
-/* ── STRUCTURED DATA CARD ── */
 function renderStructuredData(data) {
-  const tx   = data.transaction;
-  const prod = data.product;
-  const cust = data.customer;
+  const { transaction: tx, product: prod, customer: cust } = data;
 
   if (!tx && !prod && !cust) {
     return `
@@ -201,13 +162,10 @@ function renderStructuredData(data) {
       El modelo recibió datos reales del cliente, transacción y producto —
       no solo fragmentos de texto de PDFs.
     </div>
-    <div class="data-grid">
-      ${txBlock}${prodBlock}${custBlock}
-    </div>
+    <div class="data-grid">${txBlock}${prodBlock}${custBlock}</div>
   `;
 }
 
-/* ── SOURCES ── */
 function renderSources(sources) {
   if (!sources || sources.length === 0) return "";
   const rows = sources.slice(0, 6).map((s) => {
@@ -216,7 +174,6 @@ function renderSources(sources) {
     const excerpt = esc((s.excerpt || "").slice(0, 200));
     return `<tr><td>${score}</td><td><code>${uri}</code></td><td>${excerpt}</td></tr>`;
   }).join("");
-
   return `
     <details>
       <summary>Fragmentos recuperados (${sources.length})</summary>
@@ -228,11 +185,11 @@ function renderSources(sources) {
   `;
 }
 
-/* ── API CALL ── */
+/* ── API ── */
 async function askRag(mode, question, customerId = null) {
   const url = window.RAG_API_URL;
   if (!url) throw new Error("RAG_API_URL no configurado. Ejecuta terraform apply.");
-  const res  = await fetch(url, {
+  const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ mode, question, ...(customerId ? { customer_id: customerId } : {}) }),
@@ -242,7 +199,7 @@ async function askRag(mode, question, customerId = null) {
   return json;
 }
 
-/* ── PRESET QUESTIONS ── */
+/* ── PRESETS ── */
 const PRESETS = {
   "1": "No reconozco el cargo TX-991 por USD 326.40 de ECOMMERCE_X en mi tarjeta de crédito. ¿Qué pasos debo seguir y pueden bloquear mi tarjeta?",
   "2": "No realicé el retiro TX-445 por USD 850.00 en un ATM en Guayaquil. Yo vivo en Quito. ¿Cómo reporto esto y qué riesgo tiene mi cuenta?",
@@ -258,7 +215,6 @@ function initSession() {
   const session = getSession();
   if (!session) { window.location.href = "login.html"; return null; }
 
-  // session badge + logout — present on all pages
   const badge = document.getElementById("session-badge");
   const logoutBtn = document.getElementById("logout-btn");
   if (badge) {
@@ -273,7 +229,6 @@ function initSession() {
     });
   }
 
-  // AI-Ready page: show who is logged in prominently
   const ctx = document.getElementById("session-context");
   if (ctx) {
     ctx.innerHTML = `
@@ -292,15 +247,69 @@ function initSession() {
   return session;
 }
 
+/* ── PAGE SETUP (rag.html) ── */
+function setupRagPage(mode) {
+  const isAiReady = mode === "ai-ready";
+
+  document.title = isAiReady ? "AI-Ready RAG" : "RAG Común";
+  document.getElementById("page-title").textContent = document.title;
+
+  const navBasic   = document.getElementById("nav-basic");
+  const navAiReady = document.getElementById("nav-aiready");
+  if (navBasic)   navBasic.setAttribute("aria-current",   isAiReady ? "false" : "page");
+  if (navAiReady) navAiReady.setAttribute("aria-current", isAiReady ? "page"  : "false");
+
+  const header = document.getElementById("page-header");
+  if (header) {
+    if (isAiReady) {
+      header.innerHTML = `
+        <span class="mode-badge mode-good">AI-Ready RAG</span>
+        <h1>Respuesta personalizada desde tu sesión</h1>
+        <p class="subtitle">El sistema <strong>sabe quién estás logueado</strong>. Consulta tus datos en DynamoDB antes de responder.</p>
+      `;
+    } else {
+      header.innerHTML = `
+        <span class="mode-badge mode-bad">RAG Común</span>
+        <h1>Respuesta desde PDFs sin preparación</h1>
+        <p class="subtitle">El sistema <strong>no sabe quién estás logueado</strong>. Solo busca en documentos con chunking fijo.</p>
+      `;
+    }
+  }
+
+  const warning = document.getElementById("mode-warning");
+  if (warning && !isAiReady) {
+    warning.innerHTML = `
+      <div class="alert alert-warn" style="margin-bottom:0">
+        <strong>⚠ Sin acceso a datos de sesión</strong>
+        Este modo no puede consultar tu perfil, transacciones ni productos. Responde desde PDFs genéricos — sin saber quién eres ni si la transacción que mencionas existe realmente en el sistema.
+      </div>
+    `;
+  }
+
+  const btn = document.getElementById("query-btn");
+  if (btn) {
+    btn.dataset.mode   = mode;
+    btn.dataset.target = "results";
+    btn.textContent    = isAiReady ? "Consultar AI-Ready RAG" : "Consultar RAG Común";
+    if (isAiReady) btn.classList.add("btn-query--good");
+  }
+
+  const ctx = document.getElementById("session-context");
+  if (ctx && !isAiReady) ctx.remove();
+}
+
 /* ── WIRE ── */
 function wireDemo() {
-  const session  = initSession();
-  const btn      = document.querySelector("[data-mode][data-target]");
-  const textarea = document.querySelector("#question");
-  if (!btn || !textarea) return;
+  const params = new URLSearchParams(window.location.search);
+  const mode   = params.get("mode") === "ai-ready" ? "ai-ready" : "basic";
 
-  const mode      = btn.dataset.mode;
-  const resultsEl = document.getElementById(btn.dataset.target);
+  if (document.getElementById("page-header")) setupRagPage(mode);
+
+  const session    = initSession();
+  const btn        = document.getElementById("query-btn");
+  const textarea   = document.getElementById("question");
+  const resultsEl  = document.getElementById("results");
+  if (!btn || !textarea || !resultsEl) return;
 
   document.querySelectorAll(".preset-btn").forEach((pb) => {
     pb.addEventListener("click", () => {
@@ -320,25 +329,14 @@ function wireDemo() {
     btn.disabled    = true;
     btn.textContent = "Consultando…";
     resultsEl.classList.remove("hidden");
-    resultsEl.innerHTML = `
-      <div class="loading">
-        <div class="spinner"></div>
-        Consultando Knowledge Base y generando respuesta…
-      </div>
-    `;
+    resultsEl.innerHTML = `<div class="loading"><div class="spinner"></div>Consultando Knowledge Base y generando respuesta…</div>`;
 
     try {
       const customerId = (mode === "ai-ready" && session) ? session.customer_id : null;
       const payload = await askRag(mode, question, customerId);
-      resultsEl.innerHTML = mode === "basic"
-        ? renderBasic(payload)
-        : renderAiReady(payload);
+      resultsEl.innerHTML = mode === "basic" ? renderBasic(payload) : renderAiReady(payload);
     } catch (err) {
-      resultsEl.innerHTML = `
-        <div class="alert alert-bad">
-          <strong>Error — </strong>${esc(err.message)}
-        </div>
-      `;
+      resultsEl.innerHTML = `<div class="alert alert-bad"><strong>Error — </strong>${esc(err.message)}</div>`;
     } finally {
       btn.disabled    = false;
       btn.textContent = mode === "basic" ? "Consultar RAG Común" : "Consultar AI-Ready RAG";

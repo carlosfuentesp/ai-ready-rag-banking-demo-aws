@@ -67,7 +67,7 @@ variable "generation_model_id" {
 variable "graph_context_model_id" {
   description = "Bedrock foundation model id used by GraphRAG context enrichment to extract chunk entities."
   type        = string
-  default     = "anthropic.claude-3-haiku-20240307-v1:0"
+  default     = "amazon.nova-lite-v1:0"
 }
 
 variable "embedding_dimension" {

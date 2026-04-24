@@ -86,7 +86,7 @@ Cuando termines la prueba, destruye todos los recursos desde `infra/terraform`:
 terraform destroy
 ```
 
-Los defaults están configurados para desplegar la demo completa en `us-east-1`: sitio estático, Basic RAG, AI-Ready GraphRAG sobre Neptune Analytics, guardrail, datos sintéticos en DynamoDB e ingestion jobs administrados por Terraform.
+Los defaults están configurados para desplegar la demo completa en `us-east-1`: sitio estático, Basic RAG, AI-Ready GraphRAG sobre Neptune Analytics, guardrail, datos sintéticos en DynamoDB e ingestion jobs administrados por Terraform. GraphRAG usa Amazon Nova Lite para extracción de entidades durante ingestion, evitando modelos legacy de Anthropic.
 
 El sitio estático publica tres vistas: comparación, RAG común y AI-Ready GraphRAG + Agent. Las dos vistas tienen pregunta editable y consultan una API real en AWS.
 

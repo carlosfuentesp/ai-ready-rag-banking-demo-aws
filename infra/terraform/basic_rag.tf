@@ -35,7 +35,7 @@ resource "aws_bedrockagent_knowledge_base" "basic_rag" {
 
     s3_vectors_configuration {
       vector_bucket_arn = aws_s3vectors_vector_bucket.basic_rag[0].vector_bucket_arn
-      index_arn         = aws_s3vectors_index.basic_rag[0].index_arn
+      index_name        = aws_s3vectors_index.basic_rag[0].index_name
     }
   }
 

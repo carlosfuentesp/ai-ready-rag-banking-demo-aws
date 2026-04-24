@@ -22,6 +22,12 @@ variable "enable_graphrag" {
   default     = false
 }
 
+variable "enable_basic_rag" {
+  description = "When true, Terraform creates a Basic RAG Knowledge Base with fixed-size chunking over raw PDFs only."
+  type        = bool
+  default     = true
+}
+
 variable "enable_bedrock_guardrail" {
   description = "When true, Terraform creates a Bedrock Guardrail."
   type        = bool
@@ -52,6 +58,12 @@ variable "embedding_model_arn" {
   default     = "arn:aws:bedrock:us-east-1::foundation-model/cohere.embed-multilingual-v3"
 }
 
+variable "generation_model_id" {
+  description = "Bedrock model id used by the query Lambda to generate answers from retrieved context."
+  type        = string
+  default     = "anthropic.claude-3-haiku-20240307-v1:0"
+}
+
 variable "embedding_dimension" {
   description = "Embedding vector dimension used by the Bedrock Knowledge Base and Neptune Analytics vector search."
   type        = number
@@ -67,6 +79,18 @@ variable "semantic_chunking_max_tokens" {
     condition     = var.semantic_chunking_max_tokens >= 1 && var.semantic_chunking_max_tokens <= 512
     error_message = "semantic_chunking_max_tokens must be between 1 and 512 for the default Cohere embed multilingual v3 model."
   }
+}
+
+variable "basic_chunking_max_tokens" {
+  description = "Fixed-size chunk max tokens for the Basic RAG data source."
+  type        = number
+  default     = 512
+}
+
+variable "basic_chunking_overlap_percentage" {
+  description = "Fixed-size chunk overlap percentage for the Basic RAG data source."
+  type        = number
+  default     = 20
 }
 
 variable "graph_context_enrichment_model_arn" {

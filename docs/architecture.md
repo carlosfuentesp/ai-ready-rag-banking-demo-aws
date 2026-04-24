@@ -45,11 +45,12 @@ S3 raw documents
 |---|---|
 | Raw/curated object storage | Amazon S3 |
 | Transactional synthetic tables | Amazon DynamoDB |
-| Basic vector search | Amazon OpenSearch Serverless |
+| Basic vector search | Bedrock Knowledge Bases + Amazon S3 Vectors |
 | Managed RAG | Amazon Bedrock Knowledge Bases |
 | GraphRAG | Bedrock Knowledge Bases + Amazon Neptune Analytics |
 | Guardrails | Amazon Bedrock Guardrails |
-| Agent actions | Amazon Bedrock Agents + AWS Lambda |
+| Query/API runtime | Amazon API Gateway + AWS Lambda + Bedrock Runtime |
+| Agent actions | AWS Lambda tools |
 | Runtime logs | Amazon CloudWatch |
 | Lineage | Amazon DataZone + OpenLineage-compatible curated assets |
 | Provisioning | Terraform |

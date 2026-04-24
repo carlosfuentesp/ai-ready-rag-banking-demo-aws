@@ -1,77 +1,59 @@
-const KNOWN_PATTERNS = {
-  mainCase: ["c-1023", "tx-991", "326.40", "consumo no reconocido"],
-  policy: ["política", "vigente", "tarjeta", "2025"],
-  confidentiality: ["matriz", "riesgo", "score", "umbral"],
-};
-
-function normalize(text) {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-function hasAny(text, terms) {
-  return terms.some((term) => text.includes(normalize(term)));
-}
-
-function classifyQuestion(question) {
-  const text = normalize(question);
-  if (hasAny(text, KNOWN_PATTERNS.mainCase)) return "mainCase";
-  if (hasAny(text, KNOWN_PATTERNS.policy)) return "policy";
-  if (hasAny(text, KNOWN_PATTERNS.confidentiality)) return "confidentiality";
-  return "outOfContext";
-}
-
-function basicAnswer(kind) {
-  if (kind === "outOfContext") {
-    return `
-      <p>No encuentro una fuente clara en los documentos recuperados para responder con precisión. La búsqueda trae fragmentos bancarios genéricos, pero no evidencia suficiente para esta pregunta.</p>
-      <p class="bad"><strong>Riesgo del RAG común:</strong> sin filtros ni grounding fuerte, este enfoque podría intentar completar la respuesta con información no sustentada.</p>
-    `;
+function renderSources(sources) {
+  if (!sources || sources.length === 0) {
+    return "<p>No se devolvieron fuentes recuperadas.</p>";
   }
-  if (kind === "policy") {
-    return `
-      <p>Los documentos recuperados mencionan políticas y tarifarios de reclamos. Podría aplicar la política de reclamos de tarjeta y usar el tarifario para plazos.</p>
-      <p class="bad"><strong>Falla:</strong> la recuperación mezcla documentos vigentes y obsoletos, por lo que puede sugerir plazos reemplazados.</p>
-    `;
-  }
-  if (kind === "confidentiality") {
-    return `
-      <p>La matriz interna de riesgo aparece entre las fuentes y contiene criterios de contracargo, score y umbrales operativos.</p>
-      <p class="bad"><strong>Falla:</strong> esta respuesta expone contenido restringido que no debería compartirse con el cliente.</p>
-    `;
-  }
+  const rows = sources
+    .slice(0, 6)
+    .map((source) => {
+      const score = typeof source.score === "number" ? source.score.toFixed(4) : "";
+      const uri = escapeHtml(source.source || "unknown");
+      const excerpt = escapeHtml(source.excerpt || "");
+      return `<tr><td>${score}</td><td><code>${uri}</code></td><td>${excerpt}</td></tr>`;
+    })
+    .join("");
   return `
-    <p>Con base en los documentos encontrados, el asesor debería abrir un reclamo, bloquear la tarjeta y explicar al cliente los criterios internos de contracargo. Puede usar el tarifario y política recuperados para definir plazos.</p>
-    <p class="bad"><strong>Advertencia:</strong> esta respuesta mezcla fuentes y no aplica controles de vigencia, permisos ni validación transaccional.</p>
+    <h3>Fuentes recuperadas</h3>
+    <table>
+      <thead><tr><th>Score</th><th>Fuente</th><th>Extracto</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
   `;
 }
 
-function aiReadyAnswer(kind) {
-  if (kind === "outOfContext") {
-    return `
-      <p>No tengo información suficiente en las fuentes sintéticas disponibles para responder esa pregunta.</p>
-      <p class="good"><strong>Control aplicado:</strong> la respuesta queda limitada al dominio de reclamos por consumo no reconocido en tarjeta de crédito.</p>
-    `;
-  }
-  if (kind === "policy") {
-    return `
-      <p>Para un reclamo por consumo no reconocido en tarjeta de crédito en 2025, la política vigente aplicable es <code>POL-RECLAMOS-TC-V3</code>.</p>
-      <p>Los plazos están complementados por <code>CIRCULAR-PLAZOS-2025</code>, que actualiza el plazo referencial a 15 días laborables.</p>
-    `;
-  }
-  if (kind === "confidentiality") {
-    return `
-      <p>No. Un asesor no debe compartir la matriz interna de riesgo, score de contracargo, umbral de fraude ni reglas operativas restringidas con el cliente.</p>
-      <p>Puede comunicar el procedimiento general, documentos requeridos, plazo referencial y canales de seguimiento.</p>
-    `;
+function renderStructuredData(data) {
+  if (!data || (!data.transaction && !data.product && !data.customer)) {
+    return "";
   }
   return `
-    <p>El consumo <code>TX-991</code> corresponde a tarjeta de crédito, monto <code>USD 326.40</code>, comercio <code>ECOMMERCE_X</code>, canal online y estado <code>posted</code>. Aplica el flujo de consumo no reconocido.</p>
-    <p>La política vigente es <code>POL-RECLAMOS-TC-V3</code>, complementada por <code>CIRCULAR-PLAZOS-2025</code>. El asesor puede solicitar formulario de reclamo, copia de identificación y declaración de desconocimiento, e informar un plazo referencial de 15 días laborables.</p>
-    <p>El bloqueo preventivo es posible, pero crear el caso o solicitar bloqueo requiere confirmación humana y registro de auditoría.</p>
+    <h3>Datos estructurados validados</h3>
+    <pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre>
   `;
+}
+
+async function askRag(mode, question) {
+  const apiUrl = window.RAG_API_URL;
+  if (!apiUrl) {
+    throw new Error("No se encontró config.js con window.RAG_API_URL. Vuelve a ejecutar terraform apply para publicar la configuración runtime.");
+  }
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mode, question }),
+  });
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload.error || `HTTP ${response.status}`);
+  }
+  return payload;
 }
 
 function wireDemo() {
@@ -79,10 +61,26 @@ function wireDemo() {
   const textarea = document.querySelector("#question");
   if (!button || !textarea) return;
 
-  button.addEventListener("click", () => {
+  button.addEventListener("click", async () => {
     const target = document.getElementById(button.dataset.target);
-    const kind = classifyQuestion(textarea.value);
-    target.innerHTML = button.dataset.mode === "ai-ready" ? aiReadyAnswer(kind) : basicAnswer(kind);
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Consultando...";
+    target.innerHTML = "<p>Consultando Knowledge Base y modelo Bedrock...</p>";
+
+    try {
+      const payload = await askRag(button.dataset.mode, textarea.value);
+      target.innerHTML = `
+        <div class="answer-text">${escapeHtml(payload.answer).replaceAll("\n", "<br />")}</div>
+        ${renderStructuredData(payload.structured_data)}
+        ${renderSources(payload.sources)}
+      `;
+    } catch (error) {
+      target.innerHTML = `<p class="bad"><strong>Error:</strong> ${escapeHtml(error.message)}</p>`;
+    } finally {
+      button.disabled = false;
+      button.textContent = originalText;
+    }
   });
 }
 

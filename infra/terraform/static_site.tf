@@ -58,3 +58,14 @@ resource "aws_s3_object" "static_demo_site" {
 
   depends_on = [aws_s3_bucket_policy.app_site]
 }
+
+resource "aws_s3_object" "runtime_config" {
+  count        = var.enable_static_demo_site ? 1 : 0
+  bucket       = aws_s3_bucket.app.id
+  key          = "config.js"
+  content      = "window.RAG_API_URL = ${jsonencode("${aws_apigatewayv2_api.rag.api_endpoint}/query")};\n"
+  content_type = "application/javascript; charset=utf-8"
+  etag         = md5("window.RAG_API_URL = ${jsonencode("${aws_apigatewayv2_api.rag.api_endpoint}/query")};\n")
+
+  depends_on = [aws_s3_bucket_policy.app_site]
+}

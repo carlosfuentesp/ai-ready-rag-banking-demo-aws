@@ -5,7 +5,11 @@
 - `AGENTS.md`
 - `Makefile`
 - `README.md`
+- `app/static/ai-ready-rag.html`
+- `app/static/basic-rag.html`
+- `app/static/demo.js`
 - `app/static/index.html`
+- `app/static/styles.css`
 - `data/curated/chunks_ai_ready.jsonl`
 - `data/curated/chunks_basic.jsonl`
 - `data/curated/graph_edges.jsonl`
@@ -33,6 +37,8 @@
 - `docs/aws_deploy_notes.md`
 - `docs/aws_full_test.md`
 - `docs/demo_script.md`
+- `infra/terraform/api.tf`
+- `infra/terraform/basic_rag.tf`
 - `infra/terraform/bedrock.tf`
 - `infra/terraform/datazone.tf`
 - `infra/terraform/dynamodb.tf`
@@ -47,6 +53,7 @@
 - `infra/terraform/variables.tf`
 - `infra/terraform/versions.tf`
 - `lambdas/create_claim_case/lambda_function.py`
+- `lambdas/query_rag/lambda_function.py`
 - `lambdas/request_card_block/lambda_function.py`
 - `pyproject.toml`
 - `requirements.txt`

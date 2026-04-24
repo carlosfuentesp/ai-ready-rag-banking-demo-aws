@@ -12,6 +12,8 @@ locals {
   opensearch_enc_name = substr("${local.opensearch_name}-enc", 0, 32)
   opensearch_net_name = substr("${local.opensearch_name}-net", 0, 32)
   opensearch_acc_name = substr("${local.opensearch_name}-acc", 0, 32)
+  basic_vector_bucket = substr(replace(lower("${var.project_name}-${random_id.suffix.hex}-basic-vectors"), "_", "-"), 0, 63)
+  basic_vector_index  = "basic-rag"
 
   raw_files     = fileset(local.data_root, "raw/**/*")
   curated_files = fileset(local.data_root, "curated/**/*")

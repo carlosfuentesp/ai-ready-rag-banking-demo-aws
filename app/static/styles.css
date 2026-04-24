@@ -49,6 +49,11 @@ button {
   font: inherit;
 }
 
+button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 nav a[aria-current="page"],
 .button.primary {
   color: #ffffff;
@@ -152,6 +157,10 @@ textarea {
 
 .result {
   min-height: 120px;
+}
+
+.answer-text {
+  line-height: 1.55;
 }
 
 .bad {

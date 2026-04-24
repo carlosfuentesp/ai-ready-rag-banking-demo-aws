@@ -42,8 +42,8 @@ El proyecto compara:
 └────────────────┘                         └──────────────────┬──────────────────┘
                                                                │
                                       ┌────────────────────────▼──────────────────────┐
-                                      │ Bedrock Knowledge Bases / Neptune GraphRAG   │
-                                      │ OpenSearch Serverless for Basic RAG          │
+                                      │ Bedrock KBs / S3 Vectors / Neptune GraphRAG │
+                                      │ API Gateway + Lambda query runtime           │
                                       └────────────────────────┬──────────────────────┘
                                                                │
           ┌────────────────────────────┬───────────────────────┴───────────────────────┐
@@ -86,11 +86,11 @@ terraform apply \
 
 Guía completa de prueba y limpieza: [docs/aws_full_test.md](docs/aws_full_test.md).
 
-El sitio estático publica tres vistas: comparación, RAG común y AI-Ready GraphRAG + Agent. Las dos vistas usan la misma pregunta para evidenciar el contraste.
+El sitio estático publica tres vistas: comparación, RAG común y AI-Ready GraphRAG + Agent. Las dos vistas tienen pregunta editable y consultan una API real en AWS.
 
 ## Nota sobre Terraform
 
-Terraform aprovisiona S3, DynamoDB, Lambda, IAM, OpenSearch Serverless, Bedrock Guardrail, Bedrock Knowledge Base GraphRAG, Neptune Analytics, sitio estático opcional y DataZone opcional. La creación y destrucción de recursos persistentes queda en el estado de Terraform.
+Terraform aprovisiona S3, DynamoDB, Lambda, API Gateway, IAM, S3 Vectors, OpenSearch Serverless, Bedrock Guardrail, Bedrock Knowledge Bases, Neptune Analytics, sitio estático opcional y DataZone opcional. La creación y destrucción de recursos persistentes queda en el estado de Terraform.
 
 ## Flujo de demo
 

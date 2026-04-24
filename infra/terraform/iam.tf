@@ -78,7 +78,16 @@ resource "aws_iam_role_policy" "bedrock_kb_policy" {
         Effect = "Allow"
         Action = [
           "bedrock:InvokeModel",
-          "bedrock:InvokeModelWithResponseStream"
+          "bedrock:InvokeModelWithResponseStream",
+          "bedrock:Retrieve",
+          "bedrock:RetrieveAndGenerate"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3vectors:*"
         ]
         Resource = "*"
       },
@@ -114,6 +123,33 @@ resource "aws_iam_role" "datazone_domain_execution" {
       }
       Action = "sts:AssumeRole"
     }]
+  })
+}
+
+resource "aws_iam_role_policy" "lambda_rag_access" {
+  name = "${local.name_prefix}-lambda-rag-access"
+  role = aws_iam_role.lambda_exec.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "bedrock:InvokeModel",
+          "bedrock:InvokeModelWithResponseStream",
+          "bedrock:Retrieve"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem"
+        ]
+        Resource = [for t in aws_dynamodb_table.tables : t.arn]
+      }
+    ]
   })
 }
 

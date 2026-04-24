@@ -6,8 +6,10 @@ This runbook deploys the synthetic banking RAG demo to AWS with Terraform-manage
 
 - S3 buckets for raw, curated, and optional static demo UI assets.
 - DynamoDB tables and synthetic seed items.
-- Lambda functions for claim creation and preventive card block request.
+- Lambda functions for query, claim creation, and preventive card block request.
+- API Gateway endpoint used by the static pages for real RAG calls.
 - OpenSearch Serverless vector collection.
+- Basic RAG Knowledge Base with fixed-size chunking over raw PDFs and S3 Vectors storage.
 - Bedrock Guardrail.
 - Optional Bedrock GraphRAG Knowledge Base and Neptune Analytics graph.
 - Optional DataZone domain.
@@ -68,8 +70,8 @@ terraform output -raw static_demo_site_url
 The static site includes:
 
 - `index.html`: overview and navigation.
-- `basic-rag.html`: RAG común with the shared banking question.
-- `ai-ready-rag.html`: AI-Ready GraphRAG + Agent with the same question.
+- `basic-rag.html`: RAG común with an editable question. It calls the Basic RAG Knowledge Base only.
+- `ai-ready-rag.html`: AI-Ready GraphRAG + Agent with an editable question. It calls the GraphRAG Knowledge Base and validates structured transaction data.
 
 Check the seeded synthetic transaction:
 
@@ -77,18 +79,23 @@ Check the seeded synthetic transaction:
 terraform state show 'aws_dynamodb_table_item.transactions["TX-991"]'
 ```
 
-Inspect Terraform-managed GraphRAG resources:
+Inspect Terraform-managed RAG resources:
 
 ```bash
+terraform output -raw bedrock_basic_knowledge_base_id
+terraform output -raw bedrock_basic_data_source_id
 terraform state list | grep bedrock
 terraform state list | grep neptune
 ```
 
-If `enable_graphrag=true`, the Bedrock Knowledge Base and S3 data source are created by Terraform. Bedrock ingestion/sync jobs are short-lived service operations, not persistent infrastructure resources exposed by the AWS provider. To run an ingestion job, open the Bedrock Knowledge Bases console, select the data source created by Terraform, and choose **Sync**.
+Terraform creates the Basic RAG and AI-Ready GraphRAG Knowledge Bases and data sources. Bedrock ingestion/sync jobs are short-lived service operations, not persistent infrastructure resources exposed by the AWS provider. To ingest documents, open the Bedrock Knowledge Bases console, select each data source created by Terraform, and choose **Sync**.
+
+Use the site after both sync jobs complete. The Basic RAG page retrieves only from raw PDF chunks. The AI-Ready page retrieves from GraphRAG and enriches answers with DynamoDB transaction/product/customer context.
 
 Inspect the Lambda names for console invocation:
 
 ```bash
+terraform output -raw rag_api_url
 terraform output -raw lambda_create_claim_case
 terraform output -raw lambda_request_card_block
 ```

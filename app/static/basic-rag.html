@@ -22,11 +22,11 @@
         <label for="question">Pregunta para RAG común</label>
         <textarea id="question" rows="5">El cliente C-1023 reporta el consumo no reconocido TX-991 por USD 326.40 en tarjeta de crédito. ¿Qué debe hacer el asesor, qué puede decir al cliente y si debe bloquear preventivamente la tarjeta?</textarea>
         <div class="actions">
-          <button class="button" type="button" data-mode="basic" data-target="rag-result">Responder</button>
+          <button class="button" type="button" data-mode="basic" data-target="rag-result">Responder con RAG real</button>
         </div>
       </section>
       <section class="answer">
-        <h2>Respuesta simulada</h2>
+        <h2>Respuesta del RAG real</h2>
         <div id="rag-result" class="result">
           <p>Con base en los documentos encontrados, el asesor debería abrir un reclamo, bloquear la tarjeta y explicar al cliente los criterios internos de contracargo. Puede usar el tarifario y política recuperados para definir plazos.</p>
           <p class="bad"><strong>Advertencia:</strong> esta respuesta mezcla fuentes y no aplica controles de vigencia, permisos ni validación transaccional.</p>
@@ -73,6 +73,7 @@
       </section>
     </main>
     <footer><a href="ai-ready-rag.html">Comparar con AI-Ready RAG</a></footer>
+    <script src="config.js"></script>
     <script src="demo.js"></script>
   </body>
 </html>

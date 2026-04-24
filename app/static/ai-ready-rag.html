@@ -22,11 +22,11 @@
         <label for="question">Pregunta para AI-Ready RAG</label>
         <textarea id="question" rows="5">El cliente C-1023 reporta el consumo no reconocido TX-991 por USD 326.40 en tarjeta de crédito. ¿Qué debe hacer el asesor, qué puede decir al cliente y si debe bloquear preventivamente la tarjeta?</textarea>
         <div class="actions">
-          <button class="button primary" type="button" data-mode="ai-ready" data-target="rag-result">Responder</button>
+          <button class="button primary" type="button" data-mode="ai-ready" data-target="rag-result">Responder con RAG real</button>
         </div>
       </section>
       <section class="answer">
-        <h2>Respuesta simulada</h2>
+        <h2>Respuesta del RAG real</h2>
         <div id="rag-result" class="result">
           <p>El consumo <code>TX-991</code> corresponde a tarjeta de crédito, monto <code>USD 326.40</code>, comercio <code>ECOMMERCE_X</code>, canal online y estado <code>posted</code>. Aplica el flujo de consumo no reconocido.</p>
           <p>La política vigente es <code>POL-RECLAMOS-TC-V3</code>, complementada por <code>CIRCULAR-PLAZOS-2025</code>. El asesor puede solicitar formulario de reclamo, copia de identificación y declaración de desconocimiento, e informar un plazo referencial de 15 días laborables.</p>
@@ -70,6 +70,7 @@
       </section>
     </main>
     <footer><a href="basic-rag.html">Volver al RAG común</a></footer>
+    <script src="config.js"></script>
     <script src="demo.js"></script>
   </body>
 </html>

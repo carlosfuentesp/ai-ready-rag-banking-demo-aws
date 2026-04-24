@@ -30,6 +30,14 @@ output "bedrock_guardrail_id" {
   value = var.enable_bedrock_guardrail ? aws_bedrock_guardrail.banking[0].guardrail_id : null
 }
 
+output "bedrock_basic_knowledge_base_id" {
+  value = var.enable_basic_rag ? aws_bedrockagent_knowledge_base.basic_rag[0].id : null
+}
+
+output "bedrock_basic_data_source_id" {
+  value = var.enable_basic_rag ? aws_bedrockagent_data_source.basic_rag[0].data_source_id : null
+}
+
 output "bedrock_graphrag_knowledge_base_id" {
   value = var.enable_graphrag ? aws_bedrockagent_knowledge_base.graphrag[0].id : null
 }
@@ -48,4 +56,8 @@ output "datazone_domain_id" {
 
 output "static_demo_site_url" {
   value = var.enable_static_demo_site ? "http://${aws_s3_bucket_website_configuration.app[0].website_endpoint}" : null
+}
+
+output "rag_api_url" {
+  value = "${aws_apigatewayv2_api.rag.api_endpoint}/query"
 }

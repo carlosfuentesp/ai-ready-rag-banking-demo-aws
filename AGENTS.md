@@ -8,7 +8,7 @@ Build and maintain a robust AWS demo that compares Basic RAG against AI-Ready Gr
 - Never include real customer, bank, card, credential, or account data.
 - Keep AWS calls behind adapters and provide local mocks.
 - Terraform is the source of truth for provisioning.
-- AWS CLI scripts are allowed for fast-moving Bedrock/GraphRAG/DataZone operations.
+- Provisioning must be implemented with Terraform resources, not CLI scripts.
 - Every module should be small, testable, and documented.
 - The demo UI must show Basic RAG and AI-Ready RAG side by side.
 

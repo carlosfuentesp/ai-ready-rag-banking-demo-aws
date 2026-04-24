@@ -8,17 +8,16 @@ This runbook deploys the synthetic banking RAG demo to AWS with Terraform-manage
 - DynamoDB tables and synthetic seed items.
 - Lambda functions for claim creation and preventive card block request.
 - OpenSearch Serverless vector collection.
-- Bedrock Guardrail through a Terraform `local-exec` lifecycle hook.
-- Optional Bedrock GraphRAG Knowledge Base and Neptune Analytics graph through Terraform `local-exec` lifecycle hooks.
+- Bedrock Guardrail.
+- Optional Bedrock GraphRAG Knowledge Base and Neptune Analytics graph.
 - Optional DataZone domain.
 
-Bedrock GraphRAG APIs evolve quickly, so this repo keeps those calls in parameterized AWS CLI scripts. They are still invoked by Terraform, and matching destroy hooks are registered so `terraform destroy` cleans them up.
+All persistent AWS resources are managed by Terraform provider resources.
 
 ## Prerequisites
 
-- AWS CLI v2 authenticated to the target account.
+- AWS credentials available to Terraform through your normal provider chain, such as environment variables, SSO-backed profile, or an instance/role credential source.
 - Terraform >= 1.6.
-- `jq`.
 - Python 3.11+.
 - Bedrock model access enabled in the target region.
 - IAM permission for S3, DynamoDB, Lambda, IAM, OpenSearch Serverless, Bedrock, Neptune Analytics, and optionally DataZone.
@@ -41,7 +40,7 @@ terraform apply \
   -var='aws_region=us-east-1' \
   -var='enable_static_demo_site=true' \
   -var='enable_bedrock_guardrail=true' \
-  -var='enable_bedrock_cli=true'
+  -var='enable_graphrag=true'
 ```
 
 For a cheaper smoke test without Neptune Analytics and Bedrock Knowledge Base creation:
@@ -51,7 +50,7 @@ terraform apply \
   -var='aws_region=us-east-1' \
   -var='enable_static_demo_site=true' \
   -var='enable_bedrock_guardrail=true' \
-  -var='enable_bedrock_cli=false'
+  -var='enable_graphrag=false'
 ```
 
 ## Validate
@@ -69,66 +68,39 @@ terraform output -raw static_demo_site_url
 Check the seeded synthetic transaction:
 
 ```bash
-aws dynamodb get-item \
-  --region us-east-1 \
-  --table-name "$(terraform output -json dynamodb_tables | jq -r '.transactions')" \
-  --key '{"transaction_id":{"S":"TX-991"}}'
+terraform state show 'aws_dynamodb_table_item.transactions["TX-991"]'
 ```
 
-Invoke claim creation:
+Inspect Terraform-managed GraphRAG resources:
 
 ```bash
-aws lambda invoke \
-  --region us-east-1 \
-  --function-name "$(terraform output -raw lambda_create_claim_case)" \
-  --cli-binary-format raw-in-base64-out \
-  --payload '{"customer_id":"C-1023","transaction_id":"TX-991","requested_by":"demo-asesor"}' \
-  /tmp/create_claim_case.json
-cat /tmp/create_claim_case.json
+terraform state list | grep bedrock
+terraform state list | grep neptune
 ```
 
-Invoke preventive block request:
+If `enable_graphrag=true`, the Bedrock Knowledge Base and S3 data source are created by Terraform. Bedrock ingestion/sync jobs are short-lived service operations, not persistent infrastructure resources exposed by the AWS provider. To run an ingestion job, open the Bedrock Knowledge Bases console, select the data source created by Terraform, and choose **Sync**.
+
+Inspect the Lambda names for console invocation:
 
 ```bash
-aws lambda invoke \
-  --region us-east-1 \
-  --function-name "$(terraform output -raw lambda_request_card_block)" \
-  --cli-binary-format raw-in-base64-out \
-  --payload '{"customer_id":"C-1023","product_id":"P-TC-001","requested_by":"demo-asesor","confirmation_token":"CONFIRM-DEMO"}' \
-  /tmp/request_card_block.json
-cat /tmp/request_card_block.json
-```
-
-If `enable_bedrock_cli=true`, inspect the created GraphRAG outputs:
-
-```bash
-cat ../../outputs/bedrock_graphrag_kb.json
-cat ../../outputs/bedrock_graphrag_data_source.json
-cat ../../outputs/bedrock_graphrag_ingestion_job.json
-```
-
-Inspect the guardrail:
-
-```bash
-cat ../../outputs/bedrock_guardrail.json
+terraform output -raw lambda_create_claim_case
+terraform output -raw lambda_request_card_block
 ```
 
 ## Destroy Everything
 
-Run destroy from the same Terraform directory. The destroy hooks delete CLI-created Bedrock Guardrail, Bedrock Knowledge Base, data source, and Neptune Analytics graph.
+Run destroy from the same Terraform directory.
 
 ```bash
 terraform destroy \
   -var='aws_region=us-east-1' \
   -var='enable_static_demo_site=true' \
   -var='enable_bedrock_guardrail=true' \
-  -var='enable_bedrock_cli=true'
+  -var='enable_graphrag=true'
 ```
 
-After destroy, verify there are no remaining resources with the project prefix:
+After destroy, Terraform state should be empty:
 
 ```bash
-aws s3 ls | grep ai-ready-rag-bank || true
-aws dynamodb list-tables --region us-east-1 | grep ai-ready-rag-bank || true
-aws lambda list-functions --region us-east-1 | grep ai-ready-rag-bank || true
+terraform state list
 ```

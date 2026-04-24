@@ -16,14 +16,14 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "enable_bedrock_cli" {
-  description = "When true, Terraform invokes AWS CLI scripts for Bedrock GraphRAG resources and registers destroy hooks for cleanup."
+variable "enable_graphrag" {
+  description = "When true, Terraform creates Neptune Analytics and Bedrock Knowledge Base GraphRAG resources."
   type        = bool
   default     = false
 }
 
 variable "enable_bedrock_guardrail" {
-  description = "When true, Terraform invokes AWS CLI scripts to create a Bedrock Guardrail and registers a destroy hook for cleanup."
+  description = "When true, Terraform creates a Bedrock Guardrail."
   type        = bool
   default     = true
 }
@@ -52,10 +52,10 @@ variable "embedding_model_arn" {
   default     = "arn:aws:bedrock:us-east-1::foundation-model/cohere.embed-multilingual-v3"
 }
 
-variable "graph_enrichment_model_arn" {
-  description = "Model ARN used for GraphRAG context enrichment and entity extraction."
-  type        = string
-  default     = "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
+variable "embedding_dimension" {
+  description = "Embedding vector dimension used by the Bedrock Knowledge Base and Neptune Analytics vector search."
+  type        = number
+  default     = 1024
 }
 
 variable "neptune_provisioned_memory" {

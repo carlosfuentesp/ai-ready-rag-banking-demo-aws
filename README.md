@@ -21,7 +21,7 @@ El proyecto compara:
 - PII masking.
 - Guardrails para contenido interno bancario.
 - Acción agentic con confirmación y auditoría.
-- Infraestructura aprovisionada con Terraform + AWS CLI.
+- Infraestructura aprovisionada completamente con Terraform.
 
 ## Arquitectura
 
@@ -57,7 +57,7 @@ El proyecto compara:
 ## Prerrequisitos
 
 - Terraform >= 1.6
-- AWS CLI v2 configurado
+- Credenciales AWS disponibles para Terraform
 - Python 3.11+
 - Acceso a modelos de Amazon Bedrock en la región elegida
 - Permisos para S3, IAM, DynamoDB, Lambda, Bedrock, OpenSearch Serverless, DataZone y, opcionalmente, Neptune Analytics/GraphRAG
@@ -82,14 +82,14 @@ terraform apply \
   -var='aws_region=us-east-1' \
   -var='enable_static_demo_site=true' \
   -var='enable_bedrock_guardrail=true' \
-  -var='enable_bedrock_cli=true'
+  -var='enable_graphrag=true'
 ```
 
 Guía completa de prueba y limpieza: [docs/aws_full_test.md](docs/aws_full_test.md).
 
-## Nota sobre Terraform + AWS CLI
+## Nota sobre Terraform
 
-Terraform aprovisiona recursos base: S3, DynamoDB, Lambda, IAM, OpenSearch Serverless, Guardrail, sitio estático opcional y DataZone opcional. Para funciones que suelen cambiar rápido en Bedrock GraphRAG/Neptune Analytics, este repo incluye scripts AWS CLI invocados desde Terraform con `null_resource`; también hay hooks de destroy para que `terraform destroy` elimine esos recursos.
+Terraform aprovisiona S3, DynamoDB, Lambda, IAM, OpenSearch Serverless, Bedrock Guardrail, Bedrock Knowledge Base GraphRAG, Neptune Analytics, sitio estático opcional y DataZone opcional. La creación y destrucción de recursos persistentes queda en el estado de Terraform.
 
 ## Flujo de demo
 
@@ -113,7 +113,6 @@ data/curated/              chunks, metadata, grafo y lineage pre-generados
 src/ai_ready_demo/         lógica local de demo
 app/streamlit/             UI
 infra/terraform/           IaC
-scripts/aws_cli/           AWS CLI para Bedrock, DataZone, DynamoDB y S3
 lambdas/                   funciones Lambda para acciones agentic
 tests/                     tests unitarios
 ```

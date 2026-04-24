@@ -52,7 +52,7 @@ S3 raw documents
 | Agent actions | Amazon Bedrock Agents + AWS Lambda |
 | Runtime logs | Amazon CloudWatch |
 | Lineage | Amazon DataZone + local OpenLineage-compatible files |
-| Provisioning | Terraform + AWS CLI |
+| Provisioning | Terraform |
 
 ## Why GraphRAG
 

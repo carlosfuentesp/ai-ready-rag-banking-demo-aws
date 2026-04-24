@@ -130,4 +130,4 @@ if run:
         st.json(result)
 else:
     st.info("Selecciona un rol y ejecuta la comparación.")
-    st.markdown("La demo local usa mocks para practicar sin AWS. El deploy AWS usa Terraform y scripts AWS CLI.")
+    st.markdown("La demo local usa mocks para practicar sin AWS. El deploy AWS usa Terraform.")

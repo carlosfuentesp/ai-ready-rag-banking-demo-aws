@@ -26,6 +26,22 @@ output "bedrock_kb_role_arn" {
   value = aws_iam_role.bedrock_kb_role.arn
 }
 
+output "bedrock_guardrail_id" {
+  value = var.enable_bedrock_guardrail ? aws_bedrock_guardrail.banking[0].guardrail_id : null
+}
+
+output "bedrock_graphrag_knowledge_base_id" {
+  value = var.enable_graphrag ? aws_bedrockagent_knowledge_base.graphrag[0].id : null
+}
+
+output "bedrock_graphrag_data_source_id" {
+  value = var.enable_graphrag ? aws_bedrockagent_data_source.graphrag[0].data_source_id : null
+}
+
+output "neptune_graph_arn" {
+  value = var.enable_graphrag ? aws_neptunegraph_graph.graphrag[0].arn : null
+}
+
 output "datazone_domain_id" {
   value = var.enable_datazone ? aws_datazone_domain.demo[0].id : null
 }

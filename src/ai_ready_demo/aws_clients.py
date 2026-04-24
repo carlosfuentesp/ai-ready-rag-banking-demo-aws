@@ -21,7 +21,7 @@ class NeptuneClientAdapter:
 
 class DataZoneLineageAdapter:
     def emit_openlineage_event(self, event: dict[str, Any]) -> None:
-        raise NotImplementedError("Implement with AWS CLI/API for DataZone lineage in production.")
+        raise NotImplementedError("Implement with a DataZone API client in production.")
 
 
 class DynamoDbAdapter:

@@ -83,6 +83,5 @@ The demo includes:
 - AWS adapters,
 - tests,
 - Terraform,
-- AWS CLI scripts,
 - synthetic data,
 - lineage and audit artifacts.

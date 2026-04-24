@@ -20,17 +20,17 @@ Default model ARNs in Terraform variables may need to change by region/account.
 
 ## GraphRAG
 
-Terraform invokes the AWS CLI script when `enable_bedrock_cli=true`. The script creates:
+Terraform creates GraphRAG resources when `enable_graphrag=true`:
 
 1. Neptune Analytics graph.
 2. Bedrock Knowledge Base with `NEPTUNE_ANALYTICS` storage.
-3. S3 data source with context enrichment and `CHUNK_ENTITY_EXTRACTION`.
+3. S3 data source with semantic chunking configuration.
 
-The matching Terraform destroy hook runs `scripts/aws_cli/destroy_bedrock_graphrag_kb.sh`.
+Bedrock ingestion/sync jobs are short-lived service operations, not persistent infrastructure resources exposed by the AWS provider. If you need to run ingestion, use the Bedrock Knowledge Bases console after Terraform creates the data source.
 
 ## DataZone lineage
 
-The repo emits local OpenLineage-compatible JSONL. The final API submission depends on the DataZone lineage API version enabled in your region/account. This is intentionally isolated in `scripts/aws_cli/emit_datazone_lineage.sh`.
+The repo emits local OpenLineage-compatible JSONL. DataZone domain provisioning is managed by Terraform when `enable_datazone=true`.
 
 ## Cost warning
 
@@ -41,4 +41,4 @@ cd infra/terraform
 terraform destroy
 ```
 
-CLI-created Bedrock/Neptune resources are wired to Terraform destroy hooks. Keep the `outputs/` directory until after `terraform destroy` because those JSON files contain the resource identifiers used by cleanup scripts.
+All persistent demo resources are managed by Terraform state. Destroy from the same workspace used to apply.

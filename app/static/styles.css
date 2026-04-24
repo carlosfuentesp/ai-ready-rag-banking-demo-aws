@@ -35,7 +35,8 @@ nav {
 }
 
 nav a,
-.button {
+.button,
+button {
   display: inline-flex;
   align-items: center;
   min-height: 36px;
@@ -44,6 +45,8 @@ nav a,
   color: var(--nav);
   text-decoration: none;
   background: #ffffff;
+  cursor: pointer;
+  font: inherit;
 }
 
 nav a[aria-current="page"],
@@ -120,6 +123,35 @@ section,
 .stack {
   display: grid;
   gap: 16px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+textarea {
+  width: 100%;
+  min-height: 128px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  background: #ffffff;
+  font: inherit;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.result {
+  min-height: 120px;
 }
 
 .bad {

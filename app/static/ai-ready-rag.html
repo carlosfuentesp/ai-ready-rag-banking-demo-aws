@@ -18,14 +18,20 @@
     </header>
     <main class="stack">
       <section>
-        <h2>Pregunta</h2>
-        <p>El cliente <code>C-1023</code> reporta el consumo no reconocido <code>TX-991</code> por <code>USD 326.40</code> en tarjeta de crédito. ¿Qué debe hacer el asesor, qué puede decir al cliente y si debe bloquear preventivamente la tarjeta?</p>
+        <h2>Pregunta editable</h2>
+        <label for="question">Pregunta para AI-Ready RAG</label>
+        <textarea id="question" rows="5">El cliente C-1023 reporta el consumo no reconocido TX-991 por USD 326.40 en tarjeta de crédito. ¿Qué debe hacer el asesor, qué puede decir al cliente y si debe bloquear preventivamente la tarjeta?</textarea>
+        <div class="actions">
+          <button class="button primary" type="button" data-mode="ai-ready" data-target="rag-result">Responder</button>
+        </div>
       </section>
       <section class="answer">
         <h2>Respuesta simulada</h2>
-        <p>El consumo <code>TX-991</code> corresponde a tarjeta de crédito, monto <code>USD 326.40</code>, comercio <code>ECOMMERCE_X</code>, canal online y estado <code>posted</code>. Aplica el flujo de consumo no reconocido.</p>
-        <p>La política vigente es <code>POL-RECLAMOS-TC-V3</code>, complementada por <code>CIRCULAR-PLAZOS-2025</code>. El asesor puede solicitar formulario de reclamo, copia de identificación y declaración de desconocimiento, e informar un plazo referencial de 15 días laborables.</p>
-        <p>El asesor puede explicar al cliente que el bloqueo preventivo es posible, pero crear el caso o solicitar bloqueo requiere confirmación humana y registro de auditoría.</p>
+        <div id="rag-result" class="result">
+          <p>El consumo <code>TX-991</code> corresponde a tarjeta de crédito, monto <code>USD 326.40</code>, comercio <code>ECOMMERCE_X</code>, canal online y estado <code>posted</code>. Aplica el flujo de consumo no reconocido.</p>
+          <p>La política vigente es <code>POL-RECLAMOS-TC-V3</code>, complementada por <code>CIRCULAR-PLAZOS-2025</code>. El asesor puede solicitar formulario de reclamo, copia de identificación y declaración de desconocimiento, e informar un plazo referencial de 15 días laborables.</p>
+          <p>El asesor puede explicar al cliente que el bloqueo preventivo es posible, pero crear el caso o solicitar bloqueo requiere confirmación humana y registro de auditoría.</p>
+        </div>
       </section>
       <div class="grid">
         <section>
@@ -64,5 +70,6 @@
       </section>
     </main>
     <footer><a href="basic-rag.html">Volver al RAG común</a></footer>
+    <script src="demo.js"></script>
   </body>
 </html>

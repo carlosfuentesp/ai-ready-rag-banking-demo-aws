@@ -3,76 +3,41 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>RAG común</title>
+    <title>RAG Común</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header>
-      <h1>RAG común</h1>
-      <p>Respuesta deliberadamente vulnerable para demostrar fallas típicas de RAG sin datos preparados.</p>
       <nav>
-        <a href="index.html">Comparación</a>
-        <a href="basic-rag.html" aria-current="page">RAG común</a>
+        <a href="index.html">← Comparación</a>
+        <a href="basic-rag.html" aria-current="page">RAG Común</a>
         <a href="ai-ready-rag.html">AI-Ready RAG</a>
       </nav>
+      <div class="page-title">
+        <span class="mode-badge mode-bad">RAG Común</span>
+        <h1>Respuesta desde PDFs sin preparación</h1>
+        <p class="subtitle">Chunking fijo · Sin acceso a datos estructurados · Sin filtros de vigencia ni rol</p>
+      </div>
     </header>
-    <main class="stack">
-      <section>
-        <h2>Pregunta editable</h2>
-        <label for="question">Pregunta para RAG común</label>
-        <textarea id="question" rows="5">El cliente C-1023 reporta el consumo no reconocido TX-991 por USD 326.40 en tarjeta de crédito. ¿Qué debe hacer el asesor, qué puede decir al cliente y si debe bloquear preventivamente la tarjeta?</textarea>
-        <div class="actions">
-          <button class="button" type="button" data-mode="basic" data-target="rag-result">Responder con RAG real</button>
+
+    <main>
+      <section class="query-card">
+        <label for="question">Pregunta al sistema</label>
+        <div class="presets">
+          <span class="presets-label">Ejemplos:</span>
+          <button class="preset-btn" type="button" data-q="1">① Cargo online no reconocido</button>
+          <button class="preset-btn" type="button" data-q="2">② Retiro ATM en otra ciudad</button>
+          <button class="preset-btn" type="button" data-q="3">③ Doble cobro en restaurante</button>
         </div>
+        <textarea id="question" rows="4">El cliente C-1023 no reconoce el cargo TX-991 por USD 326.40 de ECOMMERCE_X en su tarjeta de crédito. ¿Qué pasos debe seguir el asesor y puede recomendar bloqueo preventivo?</textarea>
+        <button class="btn-query" type="button" data-mode="basic" data-target="results">
+          Consultar RAG Común
+        </button>
       </section>
-      <section class="answer">
-        <h2>Respuesta del RAG real</h2>
-        <div id="rag-result" class="result">
-          <p>Con base en los documentos encontrados, el asesor debería abrir un reclamo, bloquear la tarjeta y explicar al cliente los criterios internos de contracargo. Puede usar el tarifario y política recuperados para definir plazos.</p>
-          <p class="bad"><strong>Advertencia:</strong> esta respuesta mezcla fuentes y no aplica controles de vigencia, permisos ni validación transaccional.</p>
-        </div>
-      </section>
-      <section>
-        <h2>Fuentes recuperadas</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Documento</th>
-              <th>Problema</th>
-              <th>Riesgo</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>POL-RECLAMOS-TC-V1</code></td>
-              <td>Política obsoleta.</td>
-              <td>Plazos incorrectos y criterio reemplazado.</td>
-            </tr>
-            <tr>
-              <td><code>TARIFARIO-2023</code></td>
-              <td>Documento fuera de vigencia.</td>
-              <td>Respuesta de 30 días en lugar de 15 días laborables.</td>
-            </tr>
-            <tr>
-              <td><code>MATRIZ-RIESGO-CB</code></td>
-              <td>Contenido restringido.</td>
-              <td>Exposición de score, umbral y reglas internas.</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-      <section>
-        <h2>Fallas demostradas</h2>
-        <ul>
-          <li>No filtra por fecha de vigencia.</li>
-          <li>No filtra por rol ni confidencialidad.</li>
-          <li>No valida <code>TX-991</code> contra DynamoDB antes de recomendar acciones.</li>
-          <li>No muestra lineage de documento a respuesta.</li>
-          <li>Recomienda bloqueo sin confirmación humana.</li>
-        </ul>
-      </section>
+
+      <div id="results" class="results-area hidden"></div>
     </main>
-    <footer><a href="ai-ready-rag.html">Comparar con AI-Ready RAG</a></footer>
+
     <script src="config.js"></script>
     <script src="demo.js"></script>
   </body>

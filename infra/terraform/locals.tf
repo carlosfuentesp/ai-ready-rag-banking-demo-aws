@@ -8,12 +8,10 @@ resource "random_id" "suffix" {
 locals {
   name_prefix         = "${var.project_name}-${random_id.suffix.hex}"
   data_root           = abspath("${path.module}/${var.data_root_path}")
-  opensearch_name     = substr(replace(lower("${var.project_name}-${random_id.suffix.hex}-vec"), "_", "-"), 0, 32)
-  opensearch_enc_name = substr("${local.opensearch_name}-enc", 0, 32)
-  opensearch_net_name = substr("${local.opensearch_name}-net", 0, 32)
-  opensearch_acc_name = substr("${local.opensearch_name}-acc", 0, 32)
-  basic_vector_bucket = substr(replace(lower("${var.project_name}-${random_id.suffix.hex}-basic-vectors"), "_", "-"), 0, 63)
-  basic_vector_index  = "basic-rag"
+  basic_vector_bucket   = substr(replace(lower("${var.project_name}-${random_id.suffix.hex}-basic-vectors"), "_", "-"), 0, 63)
+  basic_vector_index    = "basic-rag"
+  graphrag_vector_bucket = substr(replace(lower("${var.project_name}-${random_id.suffix.hex}-graphrag-vectors"), "_", "-"), 0, 63)
+  graphrag_vector_index  = "graphrag"
 
   raw_files     = fileset(local.data_root, "raw/**/*")
   curated_files = fileset(local.data_root, "curated/**/*")

@@ -91,21 +91,6 @@ resource "aws_iam_role_policy" "bedrock_kb_policy" {
         ]
         Resource = "*"
       },
-      {
-        Effect = "Allow"
-        Action = [
-          "aoss:APIAccessAll",
-          "aoss:DashboardsAccessAll"
-        ]
-        Resource = "*"
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "neptune-graph:*"
-        ]
-        Resource = "*"
-      }
     ]
   })
 }

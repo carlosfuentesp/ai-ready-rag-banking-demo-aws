@@ -72,6 +72,6 @@ resource "aws_lambda_function" "query_rag" {
   depends_on = [
     aws_iam_role_policy.lambda_rag_access,
     aws_bedrockagent_data_source.basic_rag,
-    aws_cloudformation_stack.graphrag_data_source,
+    aws_bedrockagent_data_source.graphrag,
   ]
 }

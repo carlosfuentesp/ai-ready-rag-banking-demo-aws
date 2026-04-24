@@ -60,30 +60,28 @@ resource "aws_bedrock_guardrail" "banking" {
   }
 }
 
-resource "aws_neptunegraph_graph" "graphrag" {
+resource "aws_s3vectors_vector_bucket" "graphrag" {
   count = var.enable_graphrag ? 1 : 0
 
-  graph_name          = substr(replace(lower("${local.name_prefix}-graph"), "_", "-"), 0, 63)
-  provisioned_memory  = var.neptune_provisioned_memory
-  public_connectivity = false
-  deletion_protection = false
-  replica_count       = 0
+  vector_bucket_name = local.graphrag_vector_bucket
+  force_destroy      = true
+}
 
-  vector_search_configuration {
-    vector_search_dimension = var.embedding_dimension
-  }
+resource "aws_s3vectors_index" "graphrag" {
+  count = var.enable_graphrag ? 1 : 0
 
-  timeouts {
-    create = "60m"
-    delete = "60m"
-  }
+  vector_bucket_name = aws_s3vectors_vector_bucket.graphrag[0].vector_bucket_name
+  index_name         = local.graphrag_vector_index
+  data_type          = "float32"
+  dimension          = var.embedding_dimension
+  distance_metric    = "cosine"
 }
 
 resource "aws_bedrockagent_knowledge_base" "graphrag" {
   count = var.enable_graphrag ? 1 : 0
 
   name        = "${local.name_prefix}-graphrag-kb"
-  description = "AI-Ready GraphRAG knowledge base for synthetic banking demo"
+  description = "AI-Ready GraphRAG knowledge base with semantic chunking for synthetic banking demo."
   role_arn    = aws_iam_role.bedrock_kb_role.arn
 
   knowledge_base_configuration {
@@ -95,14 +93,50 @@ resource "aws_bedrockagent_knowledge_base" "graphrag" {
   }
 
   storage_configuration {
-    type = "NEPTUNE_ANALYTICS"
+    type = "S3_VECTORS"
 
-    neptune_analytics_configuration {
-      graph_arn = aws_neptunegraph_graph.graphrag[0].arn
+    s3_vectors_configuration {
+      vector_bucket_arn = aws_s3vectors_vector_bucket.graphrag[0].vector_bucket_arn
+      index_name        = aws_s3vectors_index.graphrag[0].index_name
+    }
+  }
 
-      field_mapping {
-        metadata_field = "metadata"
-        text_field     = "text"
+  timeouts {
+    create = "60m"
+    delete = "60m"
+  }
+
+  depends_on = [
+    aws_iam_role_policy.bedrock_kb_policy,
+    aws_s3vectors_index.graphrag,
+  ]
+}
+
+resource "aws_bedrockagent_data_source" "graphrag" {
+  count = var.enable_graphrag ? 1 : 0
+
+  knowledge_base_id    = aws_bedrockagent_knowledge_base.graphrag[0].id
+  name                 = "${local.name_prefix}-graphrag-source"
+  description          = "Synthetic banking documents for AI-Ready GraphRAG with semantic chunking."
+  data_deletion_policy = "DELETE"
+
+  data_source_configuration {
+    type = "S3"
+
+    s3_configuration {
+      bucket_arn         = aws_s3_bucket.raw.arn
+      inclusion_prefixes = ["raw/documents/"]
+    }
+  }
+
+  vector_ingestion_configuration {
+    chunking_configuration {
+      chunking_strategy = "SEMANTIC"
+
+      semantic_chunking_configuration {
+        breakpoint_percentile_threshold = 75
+        buffer_size                     = 1
+        max_token                       = var.semantic_chunking_max_tokens
       }
     }
   }
@@ -112,70 +146,23 @@ resource "aws_bedrockagent_knowledge_base" "graphrag" {
     delete = "60m"
   }
 
-  depends_on = [aws_iam_role_policy.bedrock_kb_policy]
+  depends_on = [
+    aws_s3_object.raw_data,
+    aws_bedrockagent_knowledge_base.graphrag,
+  ]
 }
 
-resource "aws_cloudformation_stack" "graphrag_data_source" {
+resource "null_resource" "graphrag_ingestion" {
   count = var.enable_graphrag ? 1 : 0
 
-  name               = "${local.name_prefix}-graphrag-ds"
-  timeout_in_minutes = 60
-
-  template_body = jsonencode({
-    AWSTemplateFormatVersion = "2010-09-09"
-    Description              = "Bedrock GraphRAG data source with required Neptune context enrichment."
-    Resources = {
-      GraphRagDataSource = {
-        Type = "AWS::Bedrock::DataSource"
-        Properties = {
-          KnowledgeBaseId    = aws_bedrockagent_knowledge_base.graphrag[0].id
-          Name               = "${local.name_prefix}-graphrag-source"
-          Description        = "Synthetic banking documents for GraphRAG"
-          DataDeletionPolicy = "DELETE"
-          DataSourceConfiguration = {
-            Type = "S3"
-            S3Configuration = {
-              BucketArn         = aws_s3_bucket.raw.arn
-              InclusionPrefixes = ["raw/documents/"]
-            }
-          }
-          VectorIngestionConfiguration = {
-            ChunkingConfiguration = {
-              ChunkingStrategy = "SEMANTIC"
-              SemanticChunkingConfiguration = {
-                BreakpointPercentileThreshold = 75
-                BufferSize                    = 1
-                MaxTokens                     = var.semantic_chunking_max_tokens
-              }
-            }
-            ContextEnrichmentConfiguration = {
-              Type = "BEDROCK_FOUNDATION_MODEL"
-              BedrockFoundationModelConfiguration = {
-                ModelArn = var.graph_context_enrichment_model_arn
-                EnrichmentStrategyConfiguration = {
-                  Method = "CHUNK_ENTITY_EXTRACTION"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    Outputs = {
-      DataSourceId = {
-        Value = { "Fn::GetAtt" = ["GraphRagDataSource", "DataSourceId"] }
-      }
-    }
-  })
-
-  depends_on = [
-    aws_bedrockagent_knowledge_base.graphrag,
-    aws_s3_object.raw_data,
-  ]
-
-  lifecycle {
-    replace_triggered_by = [
-      aws_bedrockagent_knowledge_base.graphrag,
-    ]
+  triggers = {
+    data_source_id    = aws_bedrockagent_data_source.graphrag[0].data_source_id
+    knowledge_base_id = aws_bedrockagent_knowledge_base.graphrag[0].id
   }
+
+  provisioner "local-exec" {
+    command = "aws bedrock-agent start-ingestion-job --knowledge-base-id ${aws_bedrockagent_knowledge_base.graphrag[0].id} --data-source-id ${aws_bedrockagent_data_source.graphrag[0].data_source_id} --region ${var.aws_region}"
+  }
+
+  depends_on = [aws_bedrockagent_data_source.graphrag]
 }

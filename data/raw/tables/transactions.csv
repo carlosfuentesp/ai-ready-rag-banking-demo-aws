@@ -1,3 +1,6 @@
 transaction_id,customer_id,product_id,product,amount,merchant,city,date,channel,status
 TX-991,C-1023,P-TC-001,tarjeta_credito,326.40,ECOMMERCE_X,Quito,2025-11-03,online,posted
 TX-117,C-1023,P-CA-001,cuenta_ahorros,15.00,ATM_INTERNO,Ambato,2025-11-01,atm,posted
+TX-445,C-2048,P-CA-002,cuenta_ahorros,850.00,ATM_EXTERNO,Guayaquil,2025-10-28,atm,posted
+TX-782,C-3050,P-TC-002,tarjeta_credito,127.50,RESTAURANTE_A,Cuenca,2025-11-05,pos,posted
+TX-783,C-3050,P-TC-002,tarjeta_credito,127.50,RESTAURANTE_A,Cuenca,2025-11-05,pos,posted

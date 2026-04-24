@@ -29,7 +29,7 @@ def response(status_code: int, body: dict[str, Any]) -> dict[str, Any]:
             "Access-Control-Allow-Methods": "OPTIONS,POST",
             "Content-Type": "application/json",
         },
-        "body": json.dumps(body, ensure_ascii=False),
+        "body": json.dumps(body, ensure_ascii=False, default=str),
     }
 
 

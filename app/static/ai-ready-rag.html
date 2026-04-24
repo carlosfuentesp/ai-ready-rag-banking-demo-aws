@@ -3,73 +3,41 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AI-Ready GraphRAG + Agent</title>
+    <title>AI-Ready RAG</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header>
-      <h1>AI-Ready GraphRAG + Agent</h1>
-      <p>Respuesta gobernada por metadata, grafo, permisos, guardrails, lineage y confirmación humana.</p>
       <nav>
-        <a href="index.html">Comparación</a>
-        <a href="basic-rag.html">RAG común</a>
+        <a href="index.html">← Comparación</a>
+        <a href="basic-rag.html">RAG Común</a>
         <a href="ai-ready-rag.html" aria-current="page">AI-Ready RAG</a>
       </nav>
-    </header>
-    <main class="stack">
-      <section>
-        <h2>Pregunta editable</h2>
-        <label for="question">Pregunta para AI-Ready RAG</label>
-        <textarea id="question" rows="5">El cliente C-1023 reporta el consumo no reconocido TX-991 por USD 326.40 en tarjeta de crédito. ¿Qué debe hacer el asesor, qué puede decir al cliente y si debe bloquear preventivamente la tarjeta?</textarea>
-        <div class="actions">
-          <button class="button primary" type="button" data-mode="ai-ready" data-target="rag-result">Responder con RAG real</button>
-        </div>
-      </section>
-      <section class="answer">
-        <h2>Respuesta del RAG real</h2>
-        <div id="rag-result" class="result">
-          <p>El consumo <code>TX-991</code> corresponde a tarjeta de crédito, monto <code>USD 326.40</code>, comercio <code>ECOMMERCE_X</code>, canal online y estado <code>posted</code>. Aplica el flujo de consumo no reconocido.</p>
-          <p>La política vigente es <code>POL-RECLAMOS-TC-V3</code>, complementada por <code>CIRCULAR-PLAZOS-2025</code>. El asesor puede solicitar formulario de reclamo, copia de identificación y declaración de desconocimiento, e informar un plazo referencial de 15 días laborables.</p>
-          <p>El asesor puede explicar al cliente que el bloqueo preventivo es posible, pero crear el caso o solicitar bloqueo requiere confirmación humana y registro de auditoría.</p>
-        </div>
-      </section>
-      <div class="grid">
-        <section>
-          <h2>Filtros aplicados</h2>
-          <ul>
-            <li>Producto: <code>tarjeta_credito</code></li>
-            <li>País: <code>EC</code></li>
-            <li>Vigencia: documentos activos para la fecha del caso.</li>
-            <li>Rol: asesor puede ver política interna, no matriz restringida.</li>
-            <li>Confidencialidad: contenido restringido bloqueado.</li>
-          </ul>
-        </section>
-        <section>
-          <h2>Lineage y auditoría</h2>
-          <ul>
-            <li>Fuente: documentos raw en S3.</li>
-            <li>Preparación: chunks curados con metadata y entidades.</li>
-            <li>Grafo: nodos y relaciones de caso, política, circular y acción.</li>
-            <li>Acción: caso y bloqueo requieren confirmación y quedan auditados.</li>
-          </ul>
-        </section>
+      <div class="page-title">
+        <span class="mode-badge mode-good">AI-Ready RAG</span>
+        <h1>Respuesta con datos estructurados y semántica</h1>
+        <p class="subtitle">Chunking semántico · Contexto validado desde DynamoDB · Respuesta precisa por cliente</p>
       </div>
-      <section>
-        <h2>Knowledge graph traversal</h2>
-        <div class="path">TX-991 -> CLAIM-CNR -> POL-RECLAMOS-TC-V3 -> CIRCULAR-PLAZOS-2025 -> PROC-ATENCION-CNR -> ACTION-BLOQUEO</div>
+    </header>
+
+    <main>
+      <section class="query-card">
+        <label for="question">Pregunta al sistema</label>
+        <div class="presets">
+          <span class="presets-label">Ejemplos:</span>
+          <button class="preset-btn" type="button" data-q="1">① Cargo online no reconocido</button>
+          <button class="preset-btn" type="button" data-q="2">② Retiro ATM en otra ciudad</button>
+          <button class="preset-btn" type="button" data-q="3">③ Doble cobro en restaurante</button>
+        </div>
+        <textarea id="question" rows="4">El cliente C-1023 no reconoce el cargo TX-991 por USD 326.40 de ECOMMERCE_X en su tarjeta de crédito. ¿Qué pasos debe seguir el asesor y puede recomendar bloqueo preventivo?</textarea>
+        <button class="btn-query btn-query--good" type="button" data-mode="ai-ready" data-target="results">
+          Consultar AI-Ready RAG
+        </button>
       </section>
-      <section>
-        <h2>Acción agentic propuesta</h2>
-        <pre>{
-  "action_type": "CREATE_CLAIM_AND_REQUEST_CARD_BLOCK",
-  "customer_id": "C-1023",
-  "transaction_id": "TX-991",
-  "requires_confirmation": true,
-  "audit": "required"
-}</pre>
-      </section>
+
+      <div id="results" class="results-area hidden"></div>
     </main>
-    <footer><a href="basic-rag.html">Volver al RAG común</a></footer>
+
     <script src="config.js"></script>
     <script src="demo.js"></script>
   </body>

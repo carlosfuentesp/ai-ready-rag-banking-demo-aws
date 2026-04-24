@@ -19,7 +19,7 @@ variable "aws_region" {
 variable "enable_graphrag" {
   description = "When true, Terraform creates Neptune Analytics and Bedrock Knowledge Base GraphRAG resources."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "enable_basic_rag" {
@@ -43,7 +43,7 @@ variable "seed_dynamodb_tables" {
 variable "enable_static_demo_site" {
   description = "When true, Terraform publishes a public S3 static site with the side-by-side demo summary."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "enable_datazone" {
@@ -55,13 +55,13 @@ variable "enable_datazone" {
 variable "embedding_model_arn" {
   description = "Embedding model ARN for Bedrock Knowledge Bases."
   type        = string
-  default     = "arn:aws:bedrock:us-east-1::foundation-model/cohere.embed-multilingual-v3"
+  default     = "arn:aws:bedrock:us-east-1::foundation-model/amazon.titan-embed-text-v2:0"
 }
 
 variable "generation_model_id" {
   description = "Bedrock model id used by the query Lambda to generate answers from retrieved context."
   type        = string
-  default     = "anthropic.claude-3-haiku-20240307-v1:0"
+  default     = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
 }
 
 variable "embedding_dimension" {
@@ -91,18 +91,6 @@ variable "basic_chunking_overlap_percentage" {
   description = "Fixed-size chunk overlap percentage for the Basic RAG data source."
   type        = number
   default     = 20
-}
-
-variable "graph_context_enrichment_model_arn" {
-  description = "Foundation model ARN used by Bedrock GraphRAG context enrichment for chunk entity extraction."
-  type        = string
-  default     = "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
-}
-
-variable "neptune_provisioned_memory" {
-  description = "Minimum is 16 m-NCUs."
-  type        = number
-  default     = 16
 }
 
 variable "data_root_path" {

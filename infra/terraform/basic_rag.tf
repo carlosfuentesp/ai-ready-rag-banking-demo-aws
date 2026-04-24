@@ -88,3 +88,18 @@ resource "aws_bedrockagent_data_source" "basic_rag" {
     aws_bedrockagent_knowledge_base.basic_rag,
   ]
 }
+
+resource "null_resource" "basic_rag_ingestion" {
+  count = var.enable_basic_rag ? 1 : 0
+
+  triggers = {
+    data_source_id    = aws_bedrockagent_data_source.basic_rag[0].data_source_id
+    knowledge_base_id = aws_bedrockagent_knowledge_base.basic_rag[0].id
+  }
+
+  provisioner "local-exec" {
+    command = "aws bedrock-agent start-ingestion-job --knowledge-base-id ${aws_bedrockagent_knowledge_base.basic_rag[0].id} --data-source-id ${aws_bedrockagent_data_source.basic_rag[0].data_source_id} --region ${var.aws_region}"
+  }
+
+  depends_on = [aws_bedrockagent_data_source.basic_rag]
+}

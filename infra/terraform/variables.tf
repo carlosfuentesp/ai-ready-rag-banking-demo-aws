@@ -58,6 +58,17 @@ variable "embedding_dimension" {
   default     = 1024
 }
 
+variable "semantic_chunking_max_tokens" {
+  description = "Max tokens for Bedrock Knowledge Base semantic chunking. Cohere embed multilingual v3 supports up to 512."
+  type        = number
+  default     = 512
+
+  validation {
+    condition     = var.semantic_chunking_max_tokens >= 1 && var.semantic_chunking_max_tokens <= 512
+    error_message = "semantic_chunking_max_tokens must be between 1 and 512 for the default Cohere embed multilingual v3 model."
+  }
+}
+
 variable "neptune_provisioned_memory" {
   description = "Minimum is 16 m-NCUs."
   type        = number

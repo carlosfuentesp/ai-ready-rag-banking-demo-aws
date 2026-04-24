@@ -139,7 +139,7 @@ resource "aws_bedrockagent_data_source" "graphrag" {
       semantic_chunking_configuration {
         breakpoint_percentile_threshold = 75
         buffer_size                     = 1
-        max_token                       = 900
+        max_token                       = var.semantic_chunking_max_tokens
       }
     }
   }

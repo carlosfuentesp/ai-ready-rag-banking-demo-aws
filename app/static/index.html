@@ -6,7 +6,7 @@
     <title>AI-Ready RAG Banking Demo</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
+  <body data-page="compare">
     <header>
       <nav>
         <a href="index.html" aria-current="page">Comparación</a>
@@ -17,53 +17,50 @@
         <button id="logout-btn" class="btn-logout hidden" type="button">Cerrar sesión</button>
       </nav>
       <div class="page-title">
-        <h1>AI-Ready RAG — Demo Bancaria</h1>
-        <p class="subtitle">Compara la misma pregunta en dos sistemas: RAG común vs AI-Ready con datos estructurados</p>
+        <span class="mode-badge mode-good">Demo comparativa</span>
+        <h1>La misma pregunta, dos realidades</h1>
+        <p class="subtitle">RAG común responde desde PDFs crudos; AI-Ready RAG valida datos, recorre grafo, respeta controles y prepara acciones auditables.</p>
       </div>
     </header>
 
-    <main>
-      <div class="compare-intro">
-        <div class="compare-col card">
-          <span class="mode-badge mode-bad">RAG Común</span>
-          <h2>Solo PDFs, chunking fijo</h2>
-          <p>El sistema no sabe quién eres. Busca en documentos crudos con fragmentos de tamaño fijo. Puede mezclar políticas obsoletas, no valida si la transacción existe y puede filtrar información incorrecta.</p>
-          <ul class="compare-list bad-list">
-            <li>Sin acceso a datos del cliente o transacción</li>
-            <li>Sin filtros de vigencia ni rol</li>
-            <li>Chunking fijo puede partir conceptos</li>
-            <li>Respuesta genérica para cualquier usuario</li>
-          </ul>
-          <a class="btn-query" href="rag.html?mode=basic">Probar RAG Común →</a>
+    <main class="compare-main">
+      <div id="session-context" class="session-context hidden"></div>
+
+      <section class="query-card">
+        <label for="question">Pregunta única para ambos RAGs</label>
+        <div class="presets">
+          <span class="presets-label">Escenarios:</span>
+          <button class="preset-btn active" type="button" data-q="1">① Reclamo + bloqueo</button>
+          <button class="preset-btn" type="button" data-q="2">② Política incorrecta</button>
+          <button class="preset-btn" type="button" data-q="3">③ Contenido restringido</button>
         </div>
-        <div class="compare-col card">
-          <span class="mode-badge mode-good">AI-Ready RAG</span>
-          <h2>Datos estructurados + chunking semántico</h2>
-          <p>El sistema sabe quién estás logueado. Recupera tu perfil, transacciones y producto desde DynamoDB antes de generar la respuesta. La respuesta es específica para ti.</p>
-          <ul class="compare-list good-list">
-            <li>Lookup automático desde sesión activa</li>
-            <li>Contexto real: cliente, producto, transacción</li>
-            <li>Chunking semántico preserva conceptos completos</li>
-            <li>Respuesta personalizada y precisa</li>
-          </ul>
-          <a class="btn-query btn-query--good" href="rag.html?mode=ai-ready">Probar AI-Ready RAG →</a>
-        </div>
-      </div>
+        <textarea id="question" rows="5">No reconozco el cargo TX-991 por USD 326.40 de ECOMMERCE_X en mi tarjeta de crédito. ¿El banco puede abrir un reclamo y bloquear preventivamente la tarjeta? Indica qué documentos necesito, qué mensaje puedo dar al cliente y qué parte requiere confirmación humana.</textarea>
+        <button class="btn-query btn-query--good" id="compare-btn" type="button">Comparar ambos RAGs</button>
+      </section>
+
+      <section id="wow-scoreboard" class="wow-scoreboard hidden"></section>
+
+      <section class="side-by-side-results">
+        <article class="result-column">
+          <div class="result-column-header">
+            <span class="mode-badge mode-bad">RAG Común</span>
+            <strong>PDFs crudos + chunking fijo</strong>
+          </div>
+          <div id="basic-results" class="results-area"></div>
+        </article>
+        <article class="result-column result-column-good">
+          <div class="result-column-header">
+            <span class="mode-badge mode-good">AI-Ready RAG</span>
+            <strong>GraphRAG + datos estructurados + controles</strong>
+          </div>
+          <div id="ai-ready-results" class="results-area"></div>
+        </article>
+      </section>
     </main>
 
-    <script>
-      const session = JSON.parse(sessionStorage.getItem("demo_session") || "null");
-      if (!session) { window.location.href = "login.html"; }
-      else {
-        const badge = document.getElementById("session-badge");
-        badge.textContent = "👤 " + session.name + " · " + session.segment;
-        badge.classList.remove("hidden");
-        document.getElementById("logout-btn").classList.remove("hidden");
-      }
-      document.getElementById("logout-btn").addEventListener("click", () => {
-        sessionStorage.removeItem("demo_session");
-        window.location.href = "login.html";
-      });
-    </script>
+    <div id="confirm-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true"></div>
+
+    <script src="config.js"></script>
+    <script src="demo.js"></script>
   </body>
 </html>

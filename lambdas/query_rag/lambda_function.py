@@ -54,9 +54,10 @@ def get_item(table_name: str, key: dict[str, str]) -> dict[str, Any] | None:
     return dict(item) if item else None
 
 
-def structured_context(question: str) -> dict[str, Any]:
+def structured_context(question: str, customer_id: str | None = None) -> dict[str, Any]:
     transaction_id = find_id(r"\bTX-\d+\b", question)
-    customer_id = find_id(r"\bC-\d+\b", question)
+    if not customer_id:
+        customer_id = find_id(r"\bC-\d+\b", question)
 
     transaction = get_item(TRANSACTIONS_TABLE, {"transaction_id": transaction_id}) if transaction_id else None
     if transaction and not customer_id:
@@ -175,10 +176,11 @@ def lambda_handler(event, context):
         if not question:
             return response(400, {"error": "question is required"})
 
+        customer_id = str(body.get("customer_id", "")).strip() or None
         kb_id = BASIC_KB_ID if mode == "basic" else AI_READY_KB_ID
         retrieved = retrieve(kb_id, question)
         sources = compact_sources(retrieved)
-        structured = structured_context(question) if mode == "ai-ready" else {}
+        structured = structured_context(question, customer_id) if mode == "ai-ready" else {}
         system, user = build_prompt(mode, question, sources, structured)
         answer = generate(system, user)
         return response(

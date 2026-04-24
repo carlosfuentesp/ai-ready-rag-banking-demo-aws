@@ -12,15 +12,20 @@
         <a href="index.html">← Comparación</a>
         <a href="basic-rag.html">RAG Común</a>
         <a href="ai-ready-rag.html" aria-current="page">AI-Ready RAG</a>
+        <span class="nav-spacer"></span>
+        <span id="session-badge" class="session-badge hidden"></span>
+        <button id="logout-btn" class="btn-logout hidden" type="button">Cerrar sesión</button>
       </nav>
       <div class="page-title">
         <span class="mode-badge mode-good">AI-Ready RAG</span>
-        <h1>Respuesta con datos estructurados y semántica</h1>
-        <p class="subtitle">Chunking semántico · Contexto validado desde DynamoDB · Respuesta precisa por cliente</p>
+        <h1>Respuesta personalizada desde tu sesión</h1>
+        <p class="subtitle">El sistema <strong>sabe quién estás logueado</strong>. Consulta tus datos en DynamoDB antes de responder.</p>
       </div>
     </header>
 
     <main>
+      <div id="session-context" class="session-context hidden"></div>
+
       <section class="query-card">
         <label for="question">Pregunta al sistema</label>
         <div class="presets">
@@ -29,7 +34,7 @@
           <button class="preset-btn" type="button" data-q="2">② Retiro ATM en otra ciudad</button>
           <button class="preset-btn" type="button" data-q="3">③ Doble cobro en restaurante</button>
         </div>
-        <textarea id="question" rows="4">El cliente C-1023 no reconoce el cargo TX-991 por USD 326.40 de ECOMMERCE_X en su tarjeta de crédito. ¿Qué pasos debe seguir el asesor y puede recomendar bloqueo preventivo?</textarea>
+        <textarea id="question" rows="4">No reconozco el cargo TX-991 por USD 326.40 de ECOMMERCE_X en mi tarjeta de crédito. ¿Qué pasos debo seguir y pueden bloquear mi tarjeta?</textarea>
         <button class="btn-query btn-query--good" type="button" data-mode="ai-ready" data-target="results">
           Consultar AI-Ready RAG
         </button>

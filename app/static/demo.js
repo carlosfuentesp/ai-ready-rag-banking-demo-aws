@@ -229,13 +229,13 @@ function renderSources(sources) {
 }
 
 /* ── API CALL ── */
-async function askRag(mode, question) {
+async function askRag(mode, question, customerId = null) {
   const url = window.RAG_API_URL;
   if (!url) throw new Error("RAG_API_URL no configurado. Ejecuta terraform apply.");
   const res  = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mode, question }),
+    body: JSON.stringify({ mode, question, ...(customerId ? { customer_id: customerId } : {}) }),
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
@@ -244,13 +244,57 @@ async function askRag(mode, question) {
 
 /* ── PRESET QUESTIONS ── */
 const PRESETS = {
-  "1": "El cliente C-1023 no reconoce el cargo TX-991 por USD 326.40 de ECOMMERCE_X en su tarjeta de crédito. ¿Qué pasos debe seguir el asesor y puede recomendar bloqueo preventivo?",
-  "2": "La cliente C-2048 reporta que no realizó el retiro TX-445 por USD 850.00 en un ATM externo en Guayaquil. Ella vive en Quito. ¿Cómo se gestiona este caso y qué riesgo implica?",
-  "3": "El cliente C-3050 fue cobrado dos veces por RESTAURANTE_A el mismo día: TX-782 y TX-783, ambos por USD 127.50. ¿Es un doble cobro y cómo procede el banco?"
+  "1": "No reconozco el cargo TX-991 por USD 326.40 de ECOMMERCE_X en mi tarjeta de crédito. ¿Qué pasos debo seguir y pueden bloquear mi tarjeta?",
+  "2": "No realicé el retiro TX-445 por USD 850.00 en un ATM en Guayaquil. Yo vivo en Quito. ¿Cómo reporto esto y qué riesgo tiene mi cuenta?",
+  "3": "Veo dos cargos de TX-782 del mismo restaurante el mismo día por USD 127.50 cada uno. ¿Es un doble cobro y cómo procede el banco?"
 };
+
+/* ── SESSION ── */
+function getSession() {
+  return JSON.parse(sessionStorage.getItem("demo_session") || "null");
+}
+
+function initSession() {
+  const session = getSession();
+  if (!session) { window.location.href = "login.html"; return null; }
+
+  // session badge + logout — present on all pages
+  const badge = document.getElementById("session-badge");
+  const logoutBtn = document.getElementById("logout-btn");
+  if (badge) {
+    badge.textContent = "👤 " + session.name + " · " + session.segment;
+    badge.classList.remove("hidden");
+  }
+  if (logoutBtn) {
+    logoutBtn.classList.remove("hidden");
+    logoutBtn.addEventListener("click", () => {
+      sessionStorage.removeItem("demo_session");
+      window.location.href = "login.html";
+    });
+  }
+
+  // AI-Ready page: show who is logged in prominently
+  const ctx = document.getElementById("session-context");
+  if (ctx) {
+    ctx.innerHTML = `
+      <div class="session-info">
+        <span class="session-icon">🔐</span>
+        <div>
+          <strong>${esc(session.name)}</strong>
+          <span class="session-meta">Sesión activa · ${esc(session.segment)} · Riesgo ${esc(session.risk)} · ID: <code>${esc(session.customer_id)}</code></span>
+        </div>
+        <span class="session-note">El sistema usará tu perfil automáticamente</span>
+      </div>
+    `;
+    ctx.classList.remove("hidden");
+  }
+
+  return session;
+}
 
 /* ── WIRE ── */
 function wireDemo() {
+  const session  = initSession();
   const btn      = document.querySelector("[data-mode][data-target]");
   const textarea = document.querySelector("#question");
   if (!btn || !textarea) return;
@@ -284,7 +328,8 @@ function wireDemo() {
     `;
 
     try {
-      const payload = await askRag(mode, question);
+      const customerId = (mode === "ai-ready" && session) ? session.customer_id : null;
+      const payload = await askRag(mode, question, customerId);
       resultsEl.innerHTML = mode === "basic"
         ? renderBasic(payload)
         : renderAiReady(payload);

@@ -12,15 +12,23 @@
         <a href="index.html">← Comparación</a>
         <a href="basic-rag.html" aria-current="page">RAG Común</a>
         <a href="ai-ready-rag.html">AI-Ready RAG</a>
+        <span class="nav-spacer"></span>
+        <span id="session-badge" class="session-badge hidden"></span>
+        <button id="logout-btn" class="btn-logout hidden" type="button">Cerrar sesión</button>
       </nav>
       <div class="page-title">
         <span class="mode-badge mode-bad">RAG Común</span>
         <h1>Respuesta desde PDFs sin preparación</h1>
-        <p class="subtitle">Chunking fijo · Sin acceso a datos estructurados · Sin filtros de vigencia ni rol</p>
+        <p class="subtitle">El sistema <strong>no sabe quién estás logueado</strong>. Solo busca en documentos con chunking fijo.</p>
       </div>
     </header>
 
     <main>
+      <div class="alert alert-warn" style="margin-bottom:0">
+        <strong>⚠ Sin acceso a datos de sesión</strong>
+        Este modo no puede consultar tu perfil, transacciones ni productos. Responde desde PDFs genéricos — sin saber quién eres ni si la transacción que mencionas existe realmente en el sistema.
+      </div>
+
       <section class="query-card">
         <label for="question">Pregunta al sistema</label>
         <div class="presets">
@@ -29,7 +37,7 @@
           <button class="preset-btn" type="button" data-q="2">② Retiro ATM en otra ciudad</button>
           <button class="preset-btn" type="button" data-q="3">③ Doble cobro en restaurante</button>
         </div>
-        <textarea id="question" rows="4">El cliente C-1023 no reconoce el cargo TX-991 por USD 326.40 de ECOMMERCE_X en su tarjeta de crédito. ¿Qué pasos debe seguir el asesor y puede recomendar bloqueo preventivo?</textarea>
+        <textarea id="question" rows="4">No reconozco el cargo TX-991 por USD 326.40 de ECOMMERCE_X en mi tarjeta de crédito. ¿Qué pasos debo seguir y pueden bloquear mi tarjeta?</textarea>
         <button class="btn-query" type="button" data-mode="basic" data-target="results">
           Consultar RAG Común
         </button>

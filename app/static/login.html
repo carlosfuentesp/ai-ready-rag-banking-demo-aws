@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Banco Demo — Iniciar sesión</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body { display: flex; flex-direction: column; min-height: 100vh; justify-content: center; align-items: center; gap: 24px; }
+      .login-box { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 36px 32px; width: 100%; max-width: 400px; box-shadow: var(--shadow); }
+      .login-box h1 { font-size: 20px; margin-bottom: 4px; }
+      .login-box p  { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+      .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+      .field label { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+      .field input { padding: 9px 12px; border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: 14px; }
+      .field input:focus { outline: 2px solid var(--nav-bg); outline-offset: 1px; }
+      .btn-login { width: 100%; padding: 10px; border: none; border-radius: 6px; background: var(--nav-bg); color: #fff; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+      .btn-login:hover { opacity: .88; }
+      .error-msg { color: var(--bad); font-size: 13px; min-height: 18px; }
+      .demo-users { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; width: 100%; max-width: 400px; }
+      .demo-users h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 10px; }
+      .demo-user { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; cursor: pointer; }
+      .demo-user:last-child { border-bottom: none; }
+      .demo-user:hover { background: none; opacity: .75; }
+      .demo-user .du-name { font-weight: 600; }
+      .demo-user .du-meta { color: var(--muted); font-size: 12px; }
+      .demo-user .du-cred { font-family: ui-monospace, monospace; font-size: 12px; color: var(--muted); }
+      .bank-logo { font-size: 22px; font-weight: 800; color: var(--nav-bg); letter-spacing: -.5px; }
+    </style>
+  </head>
+  <body>
+    <div class="bank-logo">🏦 Banco Sintético Demo</div>
+
+    <div class="login-box">
+      <h1>Iniciar sesión</h1>
+      <p>Ingresa con tus credenciales para acceder al sistema de atención.</p>
+
+      <div class="field">
+        <label>Usuario</label>
+        <input id="username" type="text" placeholder="usuario" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <p class="error-msg" id="error"></p>
+      <button class="btn-login" id="login-btn">Entrar</button>
+    </div>
+
+    <div class="demo-users">
+      <h2>Usuarios de demo — clic para autocompletar</h2>
+      <div class="demo-user" data-user="carlos.andrade" data-pass="demo123">
+        <div>
+          <div class="du-name">Carlos Andrade</div>
+          <div class="du-meta">Preferente · Riesgo medio · TC Visa Gold</div>
+        </div>
+        <div class="du-cred">carlos.andrade</div>
+      </div>
+      <div class="demo-user" data-user="ana.perez" data-pass="demo123">
+        <div>
+          <div class="du-name">Ana Pérez</div>
+          <div class="du-meta">Masivo · Riesgo bajo · Cuenta Corriente</div>
+        </div>
+        <div class="du-cred">ana.perez</div>
+      </div>
+      <div class="demo-user" data-user="roberto.silva" data-pass="demo123">
+        <div>
+          <div class="du-name">Roberto Silva</div>
+          <div class="du-meta">Corporativo · Riesgo alto · TC Mastercard Platinum</div>
+        </div>
+        <div class="du-cred">roberto.silva</div>
+      </div>
+    </div>
+
+    <script>
+      const USERS = {
+        "carlos.andrade": { password: "demo123", customer_id: "C-1023", name: "Carlos Andrade",  segment: "Preferente", risk: "Medio" },
+        "ana.perez":      { password: "demo123", customer_id: "C-2048", name: "Ana Pérez",       segment: "Masivo",     risk: "Bajo"  },
+        "roberto.silva":  { password: "demo123", customer_id: "C-3050", name: "Roberto Silva",   segment: "Corporativo",risk: "Alto"  },
+      };
+
+      document.querySelectorAll(".demo-user").forEach(el => {
+        el.addEventListener("click", () => {
+          document.getElementById("username").value = el.dataset.user;
+          document.getElementById("password").value = el.dataset.pass;
+        });
+      });
+
+      document.getElementById("login-btn").addEventListener("click", login);
+      document.getElementById("password").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+
+      function login() {
+        const username = document.getElementById("username").value.trim().toLowerCase();
+        const password = document.getElementById("password").value;
+        const user = USERS[username];
+        if (!user || user.password !== password) {
+          document.getElementById("error").textContent = "Usuario o contraseña incorrectos.";
+          return;
+        }
+        sessionStorage.setItem("demo_session", JSON.stringify({
+          username, customer_id: user.customer_id, name: user.name,
+          segment: user.segment, risk: user.risk
+        }));
+        window.location.href = "index.html";
+      }
+    </script>
+  </body>
+</html>

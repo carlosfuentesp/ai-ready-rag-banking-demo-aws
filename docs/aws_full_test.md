@@ -65,6 +65,12 @@ Open the static demo URL:
 terraform output -raw static_demo_site_url
 ```
 
+The static site includes:
+
+- `index.html`: overview and navigation.
+- `basic-rag.html`: RAG común with the shared banking question.
+- `ai-ready-rag.html`: AI-Ready GraphRAG + Agent with the same question.
+
 Check the seeded synthetic transaction:
 
 ```bash

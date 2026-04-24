@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI-Ready GraphRAG + Agent</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>AI-Ready GraphRAG + Agent</h1>
+      <p>Respuesta gobernada por metadata, grafo, permisos, guardrails, lineage y confirmación humana.</p>
+      <nav>
+        <a href="index.html">Comparación</a>
+        <a href="basic-rag.html">RAG común</a>
+        <a href="ai-ready-rag.html" aria-current="page">AI-Ready RAG</a>
+      </nav>
+    </header>
+    <main class="stack">
+      <section>
+        <h2>Pregunta</h2>
+        <p>El cliente <code>C-1023</code> reporta el consumo no reconocido <code>TX-991</code> por <code>USD 326.40</code> en tarjeta de crédito. ¿Qué debe hacer el asesor, qué puede decir al cliente y si debe bloquear preventivamente la tarjeta?</p>
+      </section>
+      <section class="answer">
+        <h2>Respuesta simulada</h2>
+        <p>El consumo <code>TX-991</code> corresponde a tarjeta de crédito, monto <code>USD 326.40</code>, comercio <code>ECOMMERCE_X</code>, canal online y estado <code>posted</code>. Aplica el flujo de consumo no reconocido.</p>
+        <p>La política vigente es <code>POL-RECLAMOS-TC-V3</code>, complementada por <code>CIRCULAR-PLAZOS-2025</code>. El asesor puede solicitar formulario de reclamo, copia de identificación y declaración de desconocimiento, e informar un plazo referencial de 15 días laborables.</p>
+        <p>El asesor puede explicar al cliente que el bloqueo preventivo es posible, pero crear el caso o solicitar bloqueo requiere confirmación humana y registro de auditoría.</p>
+      </section>
+      <div class="grid">
+        <section>
+          <h2>Filtros aplicados</h2>
+          <ul>
+            <li>Producto: <code>tarjeta_credito</code></li>
+            <li>País: <code>EC</code></li>
+            <li>Vigencia: documentos activos para la fecha del caso.</li>
+            <li>Rol: asesor puede ver política interna, no matriz restringida.</li>
+            <li>Confidencialidad: contenido restringido bloqueado.</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Lineage y auditoría</h2>
+          <ul>
+            <li>Fuente: documentos raw en S3.</li>
+            <li>Preparación: chunks curados con metadata y entidades.</li>
+            <li>Grafo: nodos y relaciones de caso, política, circular y acción.</li>
+            <li>Acción: caso y bloqueo requieren confirmación y quedan auditados.</li>
+          </ul>
+        </section>
+      </div>
+      <section>
+        <h2>Knowledge graph traversal</h2>
+        <div class="path">TX-991 -> CLAIM-CNR -> POL-RECLAMOS-TC-V3 -> CIRCULAR-PLAZOS-2025 -> PROC-ATENCION-CNR -> ACTION-BLOQUEO</div>
+      </section>
+      <section>
+        <h2>Acción agentic propuesta</h2>
+        <pre>{
+  "action_type": "CREATE_CLAIM_AND_REQUEST_CARD_BLOCK",
+  "customer_id": "C-1023",
+  "transaction_id": "TX-991",
+  "requires_confirmation": true,
+  "audit": "required"
+}</pre>
+      </section>
+    </main>
+    <footer><a href="basic-rag.html">Volver al RAG común</a></footer>
+  </body>
+</html>

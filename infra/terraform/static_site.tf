@@ -35,13 +35,26 @@ resource "aws_s3_bucket_policy" "app_site" {
   depends_on = [aws_s3_bucket_public_access_block.app_site]
 }
 
+locals {
+  static_site_files = fileset("${path.module}/../../app/static", "**/*")
+  static_site_content_types = {
+    css  = "text/css; charset=utf-8"
+    html = "text/html; charset=utf-8"
+    js   = "application/javascript; charset=utf-8"
+    json = "application/json; charset=utf-8"
+    png  = "image/png"
+    svg  = "image/svg+xml"
+  }
+}
+
 resource "aws_s3_object" "static_demo_site" {
-  count        = var.enable_static_demo_site ? 1 : 0
+  for_each = var.enable_static_demo_site ? local.static_site_files : []
+
   bucket       = aws_s3_bucket.app.id
-  key          = "index.html"
-  source       = "${path.module}/../../app/static/index.html"
-  etag         = filemd5("${path.module}/../../app/static/index.html")
-  content_type = "text/html; charset=utf-8"
+  key          = each.value
+  source       = "${path.module}/../../app/static/${each.value}"
+  etag         = filemd5("${path.module}/../../app/static/${each.value}")
+  content_type = lookup(local.static_site_content_types, lower(regex("[^.]+$", each.value)), "application/octet-stream")
 
   depends_on = [aws_s3_bucket_policy.app_site]
 }

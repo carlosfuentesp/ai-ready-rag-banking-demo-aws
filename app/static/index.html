@@ -4,176 +4,53 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AI-Ready RAG Banking Demo</title>
-    <style>
-      :root {
-        color-scheme: light;
-        --ink: #17202a;
-        --muted: #5c6773;
-        --line: #cbd5df;
-        --bad: #8a1f2d;
-        --good: #0d5f4c;
-        --panel: #ffffff;
-        --bg: #f4f7fa;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        color: var(--ink);
-        background: var(--bg);
-      }
-      header {
-        padding: 28px 32px 18px;
-        border-bottom: 1px solid var(--line);
-        background: #ffffff;
-      }
-      h1 {
-        margin: 0 0 8px;
-        font-size: 28px;
-        letter-spacing: 0;
-      }
-      p {
-        line-height: 1.5;
-      }
-      main {
-        padding: 24px 32px 36px;
-      }
-      .case {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 16px;
-        align-items: center;
-        padding: 16px;
-        margin-bottom: 20px;
-        border: 1px solid var(--line);
-        background: #ffffff;
-      }
-      .case strong {
-        display: block;
-        margin-bottom: 4px;
-      }
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        min-height: 28px;
-        padding: 4px 10px;
-        border: 1px solid var(--line);
-        font-size: 13px;
-        background: #eef3f7;
-      }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 20px;
-      }
-      section {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        padding: 18px;
-      }
-      h2 {
-        margin: 0 0 12px;
-        font-size: 21px;
-        letter-spacing: 0;
-      }
-      h3 {
-        margin: 18px 0 8px;
-        font-size: 15px;
-        letter-spacing: 0;
-        text-transform: uppercase;
-      }
-      ul {
-        padding-left: 20px;
-      }
-      li {
-        margin: 7px 0;
-        line-height: 1.45;
-      }
-      .bad {
-        color: var(--bad);
-      }
-      .good {
-        color: var(--good);
-      }
-      code {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        background: #eef3f7;
-        padding: 2px 5px;
-      }
-      .path {
-        overflow-x: auto;
-        padding: 12px;
-        border: 1px solid var(--line);
-        background: #f7fafc;
-        white-space: nowrap;
-      }
-      footer {
-        padding: 0 32px 30px;
-        color: var(--muted);
-        font-size: 13px;
-      }
-      @media (max-width: 820px) {
-        header,
-        main,
-        footer {
-          padding-left: 18px;
-          padding-right: 18px;
-        }
-        .grid,
-        .case {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header>
       <h1>AI-Ready RAG Banking Demo</h1>
-      <p>Comparación sintética para un reclamo ecuatoriano por consumo no reconocido en tarjeta de crédito.</p>
+      <p>La misma pregunta probada en dos experiencias: RAG común y AI-Ready GraphRAG + Agent.</p>
+      <nav>
+        <a href="index.html" aria-current="page">Comparación</a>
+        <a href="basic-rag.html">RAG común</a>
+        <a href="ai-ready-rag.html">AI-Ready RAG</a>
+      </nav>
     </header>
     <main>
       <div class="case">
         <div>
-          <strong>Caso de prueba</strong>
-          Cliente sintético <code>C-1023</code>, transacción <code>TX-991</code>, monto <code>USD 326.40</code>, producto tarjeta de crédito.
+          <strong>Pregunta única para ambas páginas</strong>
+          El cliente <code>C-1023</code> reporta el consumo no reconocido <code>TX-991</code> por <code>USD 326.40</code> en tarjeta de crédito. ¿Qué debe hacer el asesor, qué puede decir al cliente y si debe bloquear preventivamente la tarjeta?
         </div>
         <span class="badge">Datos 100% sintéticos</span>
       </div>
       <div class="grid">
         <section>
           <h2>RAG común</h2>
-          <p>Usa PDFs crudos, chunking fijo y búsqueda vectorial sin suficiente contexto operativo.</p>
-          <h3 class="bad">Fallas demostradas</h3>
+          <p>Simula una experiencia con PDFs crudos, chunking fijo y recuperación sin suficiente metadata operativa.</p>
+          <h3 class="bad">Resultado esperado</h3>
           <ul>
-            <li>Puede recuperar políticas obsoletas.</li>
-            <li>Mezcla tarjeta de crédito con cuenta de ahorros.</li>
-            <li>Puede exponer matriz interna de riesgo.</li>
-            <li>No valida la transacción estructurada antes de recomendar acción.</li>
-            <li>No muestra lineage ni requiere confirmación humana.</li>
+            <li>Puede mezclar políticas vigentes y obsoletas.</li>
+            <li>No diferencia bien tarjeta de crédito vs cuenta de ahorros.</li>
+            <li>Puede exponer criterios internos.</li>
+            <li>No valida la transacción antes de sugerir acciones.</li>
           </ul>
+          <a class="button" href="basic-rag.html">Abrir RAG común</a>
         </section>
         <section>
           <h2>AI-Ready GraphRAG + Agent</h2>
-          <p>Usa metadata, permisos, vigencia, grafo semántico, lineage y acción auditada con confirmación.</p>
-          <h3 class="good">Comportamiento esperado</h3>
+          <p>Simula una experiencia gobernada por metadata, vigencia, roles, grafo, lineage, guardrails y confirmación humana.</p>
+          <h3 class="good">Resultado esperado</h3>
           <ul>
-            <li>Filtra por producto, país, fecha, rol y confidencialidad.</li>
-            <li>Valida <code>TX-991</code> contra datos estructurados.</li>
             <li>Usa política vigente y circular 2025.</li>
-            <li>Separa respuesta visible para cliente de contenido interno.</li>
-            <li>Propone crear caso y bloqueo preventivo solo con confirmación.</li>
+            <li>Valida <code>TX-991</code> en datos estructurados.</li>
+            <li>Separa contenido para cliente y asesor.</li>
+            <li>Solicita confirmación antes de crear caso o bloqueo.</li>
           </ul>
+          <a class="button primary" href="ai-ready-rag.html">Abrir AI-Ready RAG</a>
         </section>
       </div>
-      <section style="margin-top: 20px">
-        <h2>Knowledge graph traversal</h2>
-        <div class="path">TX-991 -> CLAIM-CNR -> POL-RECLAMOS-TC-V3 -> CIRCULAR-PLAZOS-2025 -> PROC-ATENCION-CNR -> ACTION-BLOQUEO</div>
-      </section>
     </main>
-    <footer>
-      Sitio estático aprovisionado por Terraform. Destruir con <code>terraform destroy</code>.
-    </footer>
+    <footer>Sitio estático aprovisionado por Terraform. Destruir con <code>terraform destroy</code>.</footer>
   </body>
 </html>

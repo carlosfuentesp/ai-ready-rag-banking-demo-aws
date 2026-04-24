@@ -86,6 +86,8 @@ terraform apply \
 
 Guía completa de prueba y limpieza: [docs/aws_full_test.md](docs/aws_full_test.md).
 
+El sitio estático publica tres vistas: comparación, RAG común y AI-Ready GraphRAG + Agent. Las dos vistas usan la misma pregunta para evidenciar el contraste.
+
 ## Nota sobre Terraform
 
 Terraform aprovisiona S3, DynamoDB, Lambda, IAM, OpenSearch Serverless, Bedrock Guardrail, Bedrock Knowledge Base GraphRAG, Neptune Analytics, sitio estático opcional y DataZone opcional. La creación y destrucción de recursos persistentes queda en el estado de Terraform.

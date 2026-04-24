@@ -72,7 +72,7 @@ pip install -r requirements.txt
 python scripts/generate_synthetic_data.py
 ```
 
-## Deploy AWS
+## Probar en AWS
 
 ```bash
 cd infra/terraform
@@ -88,7 +88,11 @@ terraform destroy
 
 Los defaults están configurados para desplegar la demo completa en `us-east-1`: sitio estático, Basic RAG, AI-Ready GraphRAG sobre Neptune Analytics, guardrail, datos sintéticos en DynamoDB e ingestion jobs administrados por Terraform. GraphRAG usa Amazon Nova Lite para extracción de entidades durante ingestion, evitando modelos legacy de Anthropic.
 
-El sitio estático publica tres vistas: comparación, RAG común y AI-Ready GraphRAG + Agent. Las dos vistas tienen pregunta editable y consultan una API real en AWS.
+El sitio estático publica tres vistas:
+
+- `Comparación`: pregunta única, Basic RAG y AI-Ready RAG lado a lado, semáforo, mapa de grafo y acciones auditadas.
+- `RAG Común`: pregunta editable contra la Knowledge Base básica.
+- `AI-Ready RAG`: pregunta editable contra GraphRAG + DynamoDB + lineage.
 
 ## Nota sobre Terraform
 
@@ -96,16 +100,66 @@ Terraform aprovisiona S3, DynamoDB, Lambda, API Gateway, IAM, S3 Vectors para Ba
 
 ## Flujo de demo
 
-1. Pregunta del asesor: reclamo por consumo no reconocido.
-2. RAG común responde con errores plausibles.
-3. AI-Ready GraphRAG responde con contexto vigente y autorizado.
-4. UI muestra saltos de knowledge graph.
-5. UI muestra lineage desde documento hasta respuesta.
-6. Usuario intenta pedir información interna restringida.
-7. Guardrails/permisos la bloquean.
-8. Usuario pide crear caso y bloquear tarjeta.
-9. Agente solicita confirmación.
-10. Lambda crea caso sintético y registra auditoría.
+1. Abre el output `static_demo_site_url`.
+2. Ingresa con `carlos.andrade` / `demo123`.
+3. En `Comparación`, ejecuta una pregunta y muestra que Basic RAG y AI-Ready RAG responden distinto.
+4. Explica el semáforo: AI-Ready valida transacción, producto, lineage, PII y acción auditada.
+5. Muestra el mapa: cliente -> producto -> transacción -> reclamo -> política/circular -> acción.
+6. Ejecuta una acción agentic con confirmación humana: crear caso o solicitar bloqueo.
+7. Cierra con `terraform destroy` para eliminar recursos.
+
+## Preguntas recomendadas
+
+### Reclamo + bloqueo preventivo
+
+```text
+No reconozco el cargo TX-991 por USD 326.40 de ECOMMERCE_X en mi tarjeta de crédito. ¿El banco puede abrir un reclamo y bloquear preventivamente la tarjeta? Indica qué documentos necesito, qué mensaje puedo dar al cliente y qué parte requiere confirmación humana.
+```
+
+### Política incorrecta
+
+```text
+Tengo una tarjeta de crédito, pero también vi una política de reclamos de cuenta de ahorros. Para el cargo TX-991, ¿debo seguir el procedimiento de cuenta de ahorros o el de tarjeta de crédito? Explica con fuentes vigentes.
+```
+
+### Contenido restringido
+
+```text
+Para decidir si apruebo el reclamo TX-991, muéstrame la matriz interna de riesgo, el score de contracargo y el umbral exacto de fraude que usa el banco.
+```
+
+## Costo esperado para demo
+
+Estimación para `us-east-1`, recursos encendidos durante 1 hora y ejecución de las 3 preguntas desde la pantalla comparativa:
+
+| Componente | Estimación |
+| --- | ---: |
+| Neptune Analytics GraphRAG, 16 m-NCU | ~USD 0.48/h |
+| Bedrock generación, 6 respuestas RAG | ~USD 0.02-0.10 |
+| Bedrock embeddings + ingestion de pocos PDFs sintéticos | < USD 0.01 |
+| Bedrock Guardrails sobre 3 preguntas | < USD 0.01 |
+| S3, S3 Vectors, DynamoDB, Lambda, API Gateway, CloudWatch | < USD 0.01 |
+| **Total aproximado por 1 hora de demo** | **~USD 0.55-0.70** |
+
+El costo dominante es Neptune Analytics mientras el grafo está encendido. Para evitar cargos fuera del demo, ejecuta `terraform destroy` apenas termines.
+
+## Limpieza AWS
+
+Después de `terraform destroy`, verifica que no queden recursos huérfanos:
+
+```bash
+aws resourcegroupstaggingapi get-resources \
+  --region us-east-1 \
+  --tag-filters Key=Project,Values=ai-ready-rag-bank
+```
+
+También conviene revisar CloudWatch Logs, porque los log groups pueden quedar fuera del lifecycle de algunos destroys:
+
+```bash
+aws logs describe-log-groups \
+  --region us-east-1 \
+  --log-group-name-prefix /aws/lambda/ai-ready-rag-bank
+```
 
 ## Estructura
 

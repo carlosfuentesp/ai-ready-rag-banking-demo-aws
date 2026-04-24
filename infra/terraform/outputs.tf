@@ -35,7 +35,7 @@ output "bedrock_graphrag_knowledge_base_id" {
 }
 
 output "bedrock_graphrag_data_source_id" {
-  value = var.enable_graphrag ? aws_bedrockagent_data_source.graphrag[0].data_source_id : null
+  value = var.enable_graphrag ? aws_cloudformation_stack.graphrag_data_source[0].outputs["DataSourceId"] : null
 }
 
 output "neptune_graph_arn" {

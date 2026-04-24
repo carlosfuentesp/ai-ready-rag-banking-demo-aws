@@ -69,6 +69,12 @@ variable "semantic_chunking_max_tokens" {
   }
 }
 
+variable "graph_context_enrichment_model_arn" {
+  description = "Foundation model ARN used by Bedrock GraphRAG context enrichment for chunk entity extraction."
+  type        = string
+  default     = "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
+}
+
 variable "neptune_provisioned_memory" {
   description = "Minimum is 16 m-NCUs."
   type        = number

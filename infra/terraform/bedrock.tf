@@ -115,39 +115,67 @@ resource "aws_bedrockagent_knowledge_base" "graphrag" {
   depends_on = [aws_iam_role_policy.bedrock_kb_policy]
 }
 
-resource "aws_bedrockagent_data_source" "graphrag" {
+resource "aws_cloudformation_stack" "graphrag_data_source" {
   count = var.enable_graphrag ? 1 : 0
 
-  knowledge_base_id    = aws_bedrockagent_knowledge_base.graphrag[0].id
-  name                 = "${local.name_prefix}-graphrag-source"
-  description          = "Synthetic banking documents for GraphRAG"
-  data_deletion_policy = "DELETE"
+  name               = "${local.name_prefix}-graphrag-ds"
+  timeout_in_minutes = 60
 
-  data_source_configuration {
-    type = "S3"
-
-    s3_configuration {
-      bucket_arn         = aws_s3_bucket.raw.arn
-      inclusion_prefixes = ["raw/documents/"]
-    }
-  }
-
-  vector_ingestion_configuration {
-    chunking_configuration {
-      chunking_strategy = "SEMANTIC"
-
-      semantic_chunking_configuration {
-        breakpoint_percentile_threshold = 75
-        buffer_size                     = 1
-        max_token                       = var.semantic_chunking_max_tokens
+  template_body = jsonencode({
+    AWSTemplateFormatVersion = "2010-09-09"
+    Description              = "Bedrock GraphRAG data source with required Neptune context enrichment."
+    Resources = {
+      GraphRagDataSource = {
+        Type = "AWS::Bedrock::DataSource"
+        Properties = {
+          KnowledgeBaseId    = aws_bedrockagent_knowledge_base.graphrag[0].id
+          Name               = "${local.name_prefix}-graphrag-source"
+          Description        = "Synthetic banking documents for GraphRAG"
+          DataDeletionPolicy = "DELETE"
+          DataSourceConfiguration = {
+            Type = "S3"
+            S3Configuration = {
+              BucketArn         = aws_s3_bucket.raw.arn
+              InclusionPrefixes = ["raw/documents/"]
+            }
+          }
+          VectorIngestionConfiguration = {
+            ChunkingConfiguration = {
+              ChunkingStrategy = "SEMANTIC"
+              SemanticChunkingConfiguration = {
+                BreakpointPercentileThreshold = 75
+                BufferSize                    = 1
+                MaxTokens                     = var.semantic_chunking_max_tokens
+              }
+            }
+            ContextEnrichmentConfiguration = {
+              Type = "BEDROCK_FOUNDATION_MODEL"
+              BedrockFoundationModelConfiguration = {
+                ModelArn = var.graph_context_enrichment_model_arn
+                EnrichmentStrategyConfiguration = {
+                  Method = "CHUNK_ENTITY_EXTRACTION"
+                }
+              }
+            }
+          }
+        }
       }
     }
-  }
+    Outputs = {
+      DataSourceId = {
+        Value = { "Fn::GetAtt" = ["GraphRagDataSource", "DataSourceId"] }
+      }
+    }
+  })
 
-  timeouts {
-    create = "60m"
-    delete = "60m"
-  }
+  depends_on = [
+    aws_bedrockagent_knowledge_base.graphrag,
+    aws_s3_object.raw_data,
+  ]
 
-  depends_on = [aws_s3_object.raw_data]
+  lifecycle {
+    replace_triggered_by = [
+      aws_bedrockagent_knowledge_base.graphrag,
+    ]
+  }
 }

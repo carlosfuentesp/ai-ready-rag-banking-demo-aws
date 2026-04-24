@@ -535,10 +535,101 @@ body.login-page {
 .preset-btn:hover { border-color: var(--nav-bg); background: #fff; }
 .preset-btn.active { border-color: var(--nav-bg); background: var(--nav-bg); color: #fff; }
 
+.graph-context-grid,
 .split-tables {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 16px;
+}
+
+.graph-panel {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  padding: 12px;
+}
+
+.graph-panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.graph-list,
+.lineage-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+}
+
+.graph-relation {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) auto minmax(0, 1.1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+}
+
+.graph-relation span,
+.lineage-main span {
+  min-width: 0;
+  color: var(--muted);
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.lineage-event {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+}
+
+.lineage-main {
+  display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  gap: 8px;
+  align-items: start;
+  margin-bottom: 8px;
+}
+
+.lineage-outputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.graph-count,
+.more-chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+
+.graph-context-grid code {
+  min-width: 0;
+  max-width: 100%;
+  display: inline-block;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .split-tables h3 {
@@ -559,5 +650,7 @@ code {
 @media (max-width: 680px) {
   nav, .page-title, main { padding-left: 16px; padding-right: 16px; }
   .data-grid { grid-template-columns: 1fr; }
-  .split-tables { grid-template-columns: 1fr; }
+  .graph-context-grid, .split-tables { grid-template-columns: 1fr; }
+  .graph-relation { grid-template-columns: 1fr; }
+  .lineage-main { grid-template-columns: 1fr; }
 }

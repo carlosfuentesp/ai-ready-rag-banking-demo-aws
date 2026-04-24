@@ -116,33 +116,52 @@ function renderGraphContext(graph) {
   const lineage = graph.lineage_events || [];
   if (!edges.length && !lineage.length) return "";
 
-  const edgeRows = edges.slice(0, 10).map((edge) => `
-    <tr>
-      <td><code>${esc(edge.source)}</code></td>
-      <td>${esc(edge.relation)}</td>
-      <td><code>${esc(edge.target)}</code></td>
-    </tr>
+  const relationItems = edges.slice(0, 10).map((edge) => `
+    <li class="graph-relation">
+      <code>${esc(edge.source)}</code>
+      <span>${esc(edge.relation)}</span>
+      <code>${esc(edge.target)}</code>
+    </li>
   `).join("");
-  const lineageRows = lineage.slice(0, 5).map((event) => `
-    <tr>
-      <td><code>${esc(event.event_id)}</code></td>
-      <td>${esc(event.event_type)}</td>
-      <td>${esc((event.outputs || []).slice(0, 4).join(", "))}</td>
-    </tr>
-  `).join("");
+
+  const lineageItems = lineage.slice(0, 5).map((event) => {
+    const outputs = event.outputs || [];
+    const outputChips = outputs.slice(0, 6).map((output) => `<code>${esc(output)}</code>`).join("");
+    const remaining = outputs.length > 6 ? `<span class="more-chip">+${outputs.length - 6}</span>` : "";
+    return `
+      <li class="lineage-event">
+        <div class="lineage-main">
+          <code>${esc(event.event_id)}</code>
+          <span>${esc(event.event_type)}</span>
+        </div>
+        <div class="lineage-outputs">${outputChips}${remaining}</div>
+      </li>
+    `;
+  }).join("");
+
+  const relationCount = edges.length > 10 ? `<span class="graph-count">+${edges.length - 10} más</span>` : "";
+  const lineageCount = lineage.length > 5 ? `<span class="graph-count">+${lineage.length - 5} más</span>` : "";
+
+  const relationsPanel = relationItems ? `
+    <section class="graph-panel">
+      <div class="graph-panel-title">Relaciones usadas ${relationCount}</div>
+      <ul class="graph-list">${relationItems}</ul>
+    </section>
+  ` : "";
+
+  const lineagePanel = lineageItems ? `
+    <section class="graph-panel">
+      <div class="graph-panel-title">Eventos de lineage ${lineageCount}</div>
+      <ul class="lineage-list">${lineageItems}</ul>
+    </section>
+  ` : "";
 
   return `
     <div class="card">
       <div class="card-header"><span class="icon">🕸</span><h2>GraphRAG y lineage</h2></div>
-      <div class="split-tables">
-        <div>
-          <h3>Relaciones usadas</h3>
-          <table><thead><tr><th>Origen</th><th>Relación</th><th>Destino</th></tr></thead><tbody>${edgeRows}</tbody></table>
-        </div>
-        <div>
-          <h3>Eventos de lineage</h3>
-          <table><thead><tr><th>Evento</th><th>Tipo</th><th>Salidas</th></tr></thead><tbody>${lineageRows}</tbody></table>
-        </div>
+      <div class="graph-context-grid">
+        ${relationsPanel}
+        ${lineagePanel}
       </div>
     </div>
   `;

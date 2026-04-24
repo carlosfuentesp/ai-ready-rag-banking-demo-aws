@@ -186,6 +186,29 @@ def compact_sources(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sources
 
 
+def blocked_by_guardrail(question: str) -> str | None:
+    if not GUARDRAIL_ID or not GUARDRAIL_VERSION:
+        return None
+    try:
+        result = bedrock_runtime.apply_guardrail(
+            guardrailIdentifier=GUARDRAIL_ID,
+            guardrailVersion=GUARDRAIL_VERSION,
+            source="INPUT",
+            content=[{"text": {"text": question}}],
+        )
+    except Exception:
+        return None
+
+    if result.get("action") == "GUARDRAIL_INTERVENED":
+        outputs = result.get("outputs") or []
+        for output in outputs:
+            text = output.get("text")
+            if text:
+                return str(text)
+        return "No puedo procesar esta solicitud por políticas de seguridad."
+    return None
+
+
 def build_prompt(
     mode: str,
     question: str,
@@ -240,9 +263,6 @@ def generate(system: str, user: str) -> str:
         "accept": "application/json",
         "contentType": "application/json",
     }
-    if GUARDRAIL_ID and GUARDRAIL_VERSION:
-        invoke_kwargs["guardrailIdentifier"] = GUARDRAIL_ID
-        invoke_kwargs["guardrailVersion"] = GUARDRAIL_VERSION
     result = bedrock_runtime.invoke_model(**invoke_kwargs)
     payload = json.loads(result["body"].read())
     return "".join(part.get("text", "") for part in payload.get("content", []) if part.get("type") == "text")
@@ -260,6 +280,21 @@ def lambda_handler(event, context):
             return response(400, {"error": "mode must be basic or ai-ready"})
         if not question:
             return response(400, {"error": "question is required"})
+
+        guardrail_message = blocked_by_guardrail(question)
+        if guardrail_message:
+            return response(
+                200,
+                {
+                    "mode": mode,
+                    "answer": guardrail_message,
+                    "sources": [],
+                    "structured_data": {},
+                    "graph_context": {},
+                    "retrieval_count": 0,
+                    "guardrail_action": "blocked_input",
+                },
+            )
 
         customer_id = str(body.get("customer_id", "")).strip() or None
         kb_id = BASIC_KB_ID if mode == "basic" else AI_READY_KB_ID

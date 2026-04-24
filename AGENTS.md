@@ -6,7 +6,7 @@ Build and maintain a robust AWS demo that compares Basic RAG against AI-Ready Gr
 
 - Use only synthetic data.
 - Never include real customer, bank, card, credential, or account data.
-- Keep AWS calls behind adapters and provide local mocks.
+- This demo is AWS-only; do not add local runtime demo paths or local mock test flows.
 - Terraform is the source of truth for provisioning.
 - Provisioning must be implemented with Terraform resources, not CLI scripts.
 - Every module should be small, testable, and documented.
@@ -32,7 +32,7 @@ Build and maintain a robust AWS demo that compares Basic RAG against AI-Ready Gr
 - Prefer Python 3.11.
 - Use type hints.
 - Keep providers abstract: Bedrock, Neptune, DataZone, DynamoDB, S3.
-- Local mode must work without AWS credentials.
+- AWS credentials are required only when Terraform is applied; static assets and synthetic data generation remain offline build steps.
 - Do not hard-code AWS account IDs or ARNs.
 - Do not commit `.terraform`, `.venv`, secrets, generated state, or credentials.
 

@@ -64,8 +64,8 @@ variable "neptune_provisioned_memory" {
   default     = 16
 }
 
-variable "local_data_root" {
-  description = "Path to local data directory relative to Terraform root."
+variable "data_root_path" {
+  description = "Path to data directory relative to Terraform root."
   type        = string
   default     = "../../data"
 }

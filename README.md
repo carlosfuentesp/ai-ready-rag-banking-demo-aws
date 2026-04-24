@@ -27,7 +27,7 @@ El proyecto compara:
 
 ```text
                     ┌────────────────────────────┐
-                    │ Streamlit Demo UI          │
+                    │ S3 Static Demo UI          │
                     └──────────────┬─────────────┘
                                    │
         ┌──────────────────────────┴──────────────────────────┐
@@ -50,7 +50,7 @@ El proyecto compara:
           │                            │                                               │
 ┌─────────▼────────┐        ┌──────────▼──────────┐                         ┌──────────▼───────┐
 │ DataZone lineage │        │ Bedrock Guardrails  │                         │ Bedrock Agent    │
-│ / local lineage  │        │ PII + grounding     │                         │ Lambda tools     │
+│ / lineage assets │        │ PII + grounding     │                         │ Lambda tools     │
 └──────────────────┘        └─────────────────────┘                         └──────────────────┘
 ```
 
@@ -62,7 +62,7 @@ El proyecto compara:
 - Acceso a modelos de Amazon Bedrock en la región elegida
 - Permisos para S3, IAM, DynamoDB, Lambda, Bedrock, OpenSearch Serverless, DataZone y, opcionalmente, Neptune Analytics/GraphRAG
 
-## Modo local
+## Preparar datos sintéticos
 
 ```bash
 python -m venv .venv
@@ -70,7 +70,6 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 python scripts/generate_synthetic_data.py
-streamlit run app/streamlit/app.py
 ```
 
 ## Deploy AWS
@@ -110,9 +109,8 @@ Terraform aprovisiona S3, DynamoDB, Lambda, IAM, OpenSearch Serverless, Bedrock 
 data/raw/documents/        PDFs sintéticos
 data/raw/tables/           CSVs sintéticos
 data/curated/              chunks, metadata, grafo y lineage pre-generados
-src/ai_ready_demo/         lógica local de demo
-app/streamlit/             UI
+app/static/                UI estática publicada en S3 por Terraform
 infra/terraform/           IaC
 lambdas/                   funciones Lambda para acciones agentic
-tests/                     tests unitarios
+scripts/                   generación de datos sintéticos
 ```

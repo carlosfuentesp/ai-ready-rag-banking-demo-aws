@@ -30,7 +30,7 @@ Bedrock ingestion/sync jobs are short-lived service operations, not persistent i
 
 ## DataZone lineage
 
-The repo emits local OpenLineage-compatible JSONL. DataZone domain provisioning is managed by Terraform when `enable_datazone=true`.
+The repo includes OpenLineage-compatible curated JSONL assets. DataZone domain provisioning is managed by Terraform when `enable_datazone=true`.
 
 ## Cost warning
 

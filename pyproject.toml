@@ -3,7 +3,3 @@ name = "ai-ready-rag-banking-demo-aws"
 version = "0.1.0"
 description = "Synthetic AWS AI-Ready Data demo comparing Basic RAG vs AI-Ready GraphRAG for banking."
 requires-python = ">=3.11"
-
-[tool.pytest.ini_options]
-pythonpath = ["src"]
-testpaths = ["tests"]

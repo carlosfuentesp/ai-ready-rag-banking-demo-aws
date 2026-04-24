@@ -51,7 +51,7 @@ S3 raw documents
 | Guardrails | Amazon Bedrock Guardrails |
 | Agent actions | Amazon Bedrock Agents + AWS Lambda |
 | Runtime logs | Amazon CloudWatch |
-| Lineage | Amazon DataZone + local OpenLineage-compatible files |
+| Lineage | Amazon DataZone + OpenLineage-compatible curated assets |
 | Provisioning | Terraform |
 
 ## Why GraphRAG

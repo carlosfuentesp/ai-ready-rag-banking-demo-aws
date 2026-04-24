@@ -79,9 +79,7 @@ Security is applied:
 The demo includes:
 
 - modular architecture,
-- local mocks,
-- AWS adapters,
-- tests,
+- AWS-only deployment flow,
 - Terraform,
 - synthetic data,
 - lineage and audit artifacts.

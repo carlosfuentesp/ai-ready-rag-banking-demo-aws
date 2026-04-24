@@ -7,7 +7,7 @@ resource "random_id" "suffix" {
 
 locals {
   name_prefix = "${var.project_name}-${random_id.suffix.hex}"
-  data_root   = abspath("${path.module}/${var.local_data_root}")
+  data_root   = abspath("${path.module}/${var.data_root_path}")
 
   raw_files     = fileset(local.data_root, "raw/**/*")
   curated_files = fileset(local.data_root, "curated/**/*")

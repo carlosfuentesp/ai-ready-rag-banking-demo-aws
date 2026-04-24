@@ -64,10 +64,34 @@ variable "generation_model_id" {
   default     = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
 }
 
+variable "graph_context_model_id" {
+  description = "Bedrock foundation model id used by GraphRAG context enrichment to extract chunk entities."
+  type        = string
+  default     = "anthropic.claude-3-haiku-20240307-v1:0"
+}
+
 variable "embedding_dimension" {
   description = "Embedding vector dimension used by the Bedrock Knowledge Base and Neptune Analytics vector search."
   type        = number
   default     = 1024
+}
+
+variable "neptune_graph_provisioned_memory" {
+  description = "Provisioned memory-optimized Neptune Capacity Units (m-NCUs) for the GraphRAG Neptune Analytics graph."
+  type        = number
+  default     = 16
+}
+
+variable "auto_start_ingestion_jobs" {
+  description = "When true, Terraform invokes an AWS Lambda resource to start Bedrock Knowledge Base ingestion jobs after data sources are created."
+  type        = bool
+  default     = true
+}
+
+variable "ingestion_wait_seconds" {
+  description = "Maximum seconds for the Terraform-managed ingestion Lambda to wait for each Bedrock ingestion job."
+  type        = number
+  default     = 840
 }
 
 variable "semantic_chunking_max_tokens" {

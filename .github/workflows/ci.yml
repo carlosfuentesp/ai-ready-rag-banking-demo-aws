@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: python -m py_compile scripts/generate_synthetic_data.py lambdas/create_claim_case/lambda_function.py lambdas/request_card_block/lambda_function.py lambdas/query_rag/lambda_function.py
+      - run: python -m py_compile scripts/generate_synthetic_data.py lambdas/create_claim_case/lambda_function.py lambdas/request_card_block/lambda_function.py lambdas/query_rag/lambda_function.py lambdas/start_ingestion/lambda_function.py
       - uses: hashicorp/setup-terraform@v3
       - run: terraform -chdir=infra/terraform fmt -check
       - run: terraform -chdir=infra/terraform init -backend=false

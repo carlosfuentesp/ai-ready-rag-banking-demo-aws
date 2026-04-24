@@ -102,11 +102,49 @@ function renderBasic(payload) {
 function renderAiReady(payload) {
   return `
     ${renderStructuredData(payload.structured_data || {})}
+    ${renderGraphContext(payload.graph_context || {})}
     <div class="card">
       <div class="card-header"><span class="icon">💬</span><h2>Respuesta generada con contexto real</h2></div>
       <div class="answer-text md-body">${md(payload.answer)}</div>
     </div>
     ${renderSources(payload.sources)}
+  `;
+}
+
+function renderGraphContext(graph) {
+  const edges = graph.edges || [];
+  const lineage = graph.lineage_events || [];
+  if (!edges.length && !lineage.length) return "";
+
+  const edgeRows = edges.slice(0, 10).map((edge) => `
+    <tr>
+      <td><code>${esc(edge.source)}</code></td>
+      <td>${esc(edge.relation)}</td>
+      <td><code>${esc(edge.target)}</code></td>
+    </tr>
+  `).join("");
+  const lineageRows = lineage.slice(0, 5).map((event) => `
+    <tr>
+      <td><code>${esc(event.event_id)}</code></td>
+      <td>${esc(event.event_type)}</td>
+      <td>${esc((event.outputs || []).slice(0, 4).join(", "))}</td>
+    </tr>
+  `).join("");
+
+  return `
+    <div class="card">
+      <div class="card-header"><span class="icon">🕸</span><h2>GraphRAG y lineage</h2></div>
+      <div class="split-tables">
+        <div>
+          <h3>Relaciones usadas</h3>
+          <table><thead><tr><th>Origen</th><th>Relación</th><th>Destino</th></tr></thead><tbody>${edgeRows}</tbody></table>
+        </div>
+        <div>
+          <h3>Eventos de lineage</h3>
+          <table><thead><tr><th>Evento</th><th>Tipo</th><th>Salidas</th></tr></thead><tbody>${lineageRows}</tbody></table>
+        </div>
+      </div>
+    </div>
   `;
 }
 
@@ -264,8 +302,8 @@ function setupRagPage(mode) {
     if (isAiReady) {
       header.innerHTML = `
         <span class="mode-badge mode-good">AI-Ready RAG</span>
-        <h1>Respuesta personalizada desde tu sesión</h1>
-        <p class="subtitle">El sistema <strong>sabe quién estás logueado</strong>. Consulta tus datos en DynamoDB antes de responder.</p>
+        <h1>GraphRAG con datos AI-Ready</h1>
+        <p class="subtitle">El sistema usa <strong>Bedrock GraphRAG sobre Neptune Analytics</strong>, DynamoDB, lineage y contexto de sesión antes de responder.</p>
       `;
     } else {
       header.innerHTML = `

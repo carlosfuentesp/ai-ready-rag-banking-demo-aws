@@ -5,7 +5,7 @@ Demo comparativa para una charla sobre **AI-Ready Data, RAG y agentes** usando u
 El proyecto compara:
 
 1. **RAG común**: PDFs crudos + chunking fijo + vector search.
-2. **AI-Ready GraphRAG + Agent**: documentos curados, metadata rica, chunking estructural/semántico/entity-aware, knowledge graph, lineage, permisos, PII masking, guardrails y acciones agentic con confirmación humana.
+2. **AI-Ready GraphRAG + Agent**: Bedrock Knowledge Bases GraphRAG sobre Neptune Analytics, metadata rica, chunking semántico/entity-aware, lineage, permisos, PII masking, guardrails y acciones agentic con confirmación humana.
 
 > Todos los datos son sintéticos. No uses datos reales de clientes, bancos o tarjetas.
 
@@ -42,7 +42,7 @@ El proyecto compara:
 └────────────────┘                         └──────────────────┬──────────────────┘
                                                                │
                                       ┌────────────────────────▼──────────────────────┐
-                                      │ Bedrock KBs / S3 Vectors / Neptune GraphRAG │
+                                      │ Bedrock KBs / S3 Vectors / Neptune Analytics │
                                       │ API Gateway + Lambda query runtime           │
                                       └────────────────────────┬──────────────────────┘
                                                                │
@@ -60,7 +60,7 @@ El proyecto compara:
 - Credenciales AWS disponibles para Terraform
 - Python 3.11+
 - Acceso a modelos de Amazon Bedrock en la región elegida
-- Permisos para S3, IAM, DynamoDB, Lambda, Bedrock, DataZone y, opcionalmente, Neptune Analytics/GraphRAG
+- Permisos para S3, IAM, DynamoDB, Lambda, Bedrock, DataZone y Neptune Analytics/GraphRAG
 
 ## Preparar datos sintéticos
 
@@ -90,7 +90,7 @@ El sitio estático publica tres vistas: comparación, RAG común y AI-Ready Grap
 
 ## Nota sobre Terraform
 
-Terraform aprovisiona S3, DynamoDB, Lambda, API Gateway, IAM, S3 Vectors, Bedrock Guardrail, Bedrock Knowledge Bases, Neptune Analytics, sitio estático opcional y DataZone opcional. La creación y destrucción de recursos persistentes queda en el estado de Terraform.
+Terraform aprovisiona S3, DynamoDB, Lambda, API Gateway, IAM, S3 Vectors para Basic RAG, Bedrock Guardrail, Bedrock Knowledge Bases, Neptune Analytics para GraphRAG, sitio estático opcional y DataZone opcional. Terraform también invoca una Lambda administrada por Terraform para iniciar los ingestion jobs de Bedrock, sin AWS CLI ni scripts locales.
 
 ## Flujo de demo
 

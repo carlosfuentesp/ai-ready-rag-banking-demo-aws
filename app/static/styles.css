@@ -535,6 +535,17 @@ body.login-page {
 .preset-btn:hover { border-color: var(--nav-bg); background: #fff; }
 .preset-btn.active { border-color: var(--nav-bg); background: var(--nav-bg); color: #fff; }
 
+.split-tables {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.split-tables h3 {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
 /* ── UTILS ── */
 code {
   font-family: ui-monospace, Menlo, Consolas, monospace;
@@ -548,4 +559,5 @@ code {
 @media (max-width: 680px) {
   nav, .page-title, main { padding-left: 16px; padding-right: 16px; }
   .data-grid { grid-template-columns: 1fr; }
+  .split-tables { grid-template-columns: 1fr; }
 }

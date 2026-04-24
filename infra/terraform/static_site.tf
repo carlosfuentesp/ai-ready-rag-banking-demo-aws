@@ -45,6 +45,12 @@ locals {
     png  = "image/png"
     svg  = "image/svg+xml"
   }
+  runtime_config_js = join("\n", [
+    "window.RAG_API_URL = ${jsonencode("${aws_apigatewayv2_api.rag.api_endpoint}/query")};",
+    "window.CREATE_CLAIM_API_URL = ${jsonencode("${aws_apigatewayv2_api.rag.api_endpoint}/actions/create-claim-case")};",
+    "window.REQUEST_CARD_BLOCK_API_URL = ${jsonencode("${aws_apigatewayv2_api.rag.api_endpoint}/actions/request-card-block")};",
+    "",
+  ])
 }
 
 resource "aws_s3_object" "static_demo_site" {
@@ -60,22 +66,12 @@ resource "aws_s3_object" "static_demo_site" {
 }
 
 resource "aws_s3_object" "runtime_config" {
-  count  = var.enable_static_demo_site ? 1 : 0
-  bucket = aws_s3_bucket.app.id
-  key    = "config.js"
-  content = join("\n", [
-    "window.RAG_API_URL = ${jsonencode("${aws_apigatewayv2_api.rag.api_endpoint}/query")};",
-    "window.CREATE_CLAIM_API_URL = ${jsonencode("${aws_apigatewayv2_api.rag.api_endpoint}/actions/create-claim-case")};",
-    "window.REQUEST_CARD_BLOCK_API_URL = ${jsonencode("${aws_apigatewayv2_api.rag.api_endpoint}/actions/request-card-block")};",
-    "",
-  ])
+  count        = var.enable_static_demo_site ? 1 : 0
+  bucket       = aws_s3_bucket.app.id
+  key          = "config.js"
+  content      = local.runtime_config_js
   content_type = "application/javascript; charset=utf-8"
-  etag = md5(join("\n", [
-    "window.RAG_API_URL = ${jsonencode("${aws_apigatewayv2_api.rag.api_endpoint}/query")};",
-    "window.CREATE_CLAIM_API_URL = ${jsonencode("${aws_apigatewayv2_api.rag.api_endpoint}/actions/create-claim-case")};",
-    "window.REQUEST_CARD_BLOCK_API_URL = ${jsonencode("${aws_apigatewayv2_api.rag.api_endpoint}/actions/request-card-block")};",
-    "",
-  ]))
+  etag         = md5(local.runtime_config_js)
 
   depends_on = [aws_s3_bucket_policy.app_site]
 }

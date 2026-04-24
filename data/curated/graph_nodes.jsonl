@@ -1,0 +1,13 @@
+{"id": "C-1023", "type": "Customer", "label": "Cliente sintético C-1023"}
+{"id": "P-TC-001", "type": "Product", "label": "Tarjeta Crédito Visa Gold"}
+{"id": "TX-991", "type": "Transaction", "label": "USD 326.40 ECOMMERCE_X"}
+{"id": "CLAIM-CNR", "type": "ClaimType", "label": "Consumo no reconocido"}
+{"id": "POL-RECLAMOS-TC-V3", "type": "Policy", "label": "Política vigente reclamos TC v3"}
+{"id": "CIRCULAR-PLAZOS-2025", "type": "Circular", "label": "Actualización de plazos 2025"}
+{"id": "PROC-ATENCION-CNR", "type": "Procedure", "label": "Procedimiento consumo no reconocido"}
+{"id": "CONTRATO-TC-2024", "type": "Contract", "label": "Contrato tarjeta crédito 2024"}
+{"id": "FORM-RECLAMO", "type": "Document", "label": "Formulario de reclamo"}
+{"id": "ACTION-BLOQUEO", "type": "Action", "label": "Bloqueo preventivo"}
+{"id": "ACTION-CREAR-CASO", "type": "Action", "label": "Crear caso reclamo"}
+{"id": "ROLE-ASESOR", "type": "Role", "label": "Asesor bancario"}
+{"id": "ROLE-SUPERVISOR", "type": "Role", "label": "Supervisor"}

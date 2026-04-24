@@ -1,0 +1,20 @@
+{
+  "cliente": {
+    "public": true,
+    "internal": false,
+    "restricted": false,
+    "can_execute_actions": false
+  },
+  "asesor": {
+    "public": true,
+    "internal": true,
+    "restricted": false,
+    "can_execute_actions": true
+  },
+  "supervisor": {
+    "public": true,
+    "internal": true,
+    "restricted": true,
+    "can_execute_actions": true
+  }
+}

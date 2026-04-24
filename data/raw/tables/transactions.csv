@@ -1,0 +1,3 @@
+transaction_id,customer_id,product_id,product,amount,merchant,city,date,channel,status
+TX-991,C-1023,P-TC-001,tarjeta_credito,326.40,ECOMMERCE_X,Quito,2025-11-03,online,posted
+TX-117,C-1023,P-CA-001,cuenta_ahorros,15.00,ATM_INTERNO,Ambato,2025-11-01,atm,posted

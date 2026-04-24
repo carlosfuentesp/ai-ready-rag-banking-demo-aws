@@ -1,0 +1,3 @@
+product_id,customer_id,product_type,product_name,status
+P-TC-001,C-1023,tarjeta_credito,Visa Gold,active
+P-CA-001,C-1023,cuenta_ahorros,Cuenta Ahorros Plus,active

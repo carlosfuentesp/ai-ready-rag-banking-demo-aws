@@ -1,0 +1,14 @@
+{"source": "C-1023", "target": "P-TC-001", "relation": "HAS_PRODUCT"}
+{"source": "P-TC-001", "target": "TX-991", "relation": "HAS_TRANSACTION"}
+{"source": "TX-991", "target": "CLAIM-CNR", "relation": "INITIATES"}
+{"source": "CLAIM-CNR", "target": "POL-RECLAMOS-TC-V3", "relation": "GOVERNED_BY"}
+{"source": "POL-RECLAMOS-TC-V3", "target": "CIRCULAR-PLAZOS-2025", "relation": "UPDATED_BY"}
+{"source": "CLAIM-CNR", "target": "PROC-ATENCION-CNR", "relation": "USES_PROCEDURE"}
+{"source": "P-TC-001", "target": "CONTRATO-TC-2024", "relation": "GOVERNED_BY"}
+{"source": "CLAIM-CNR", "target": "FORM-RECLAMO", "relation": "REQUIRES_DOCUMENT"}
+{"source": "CLAIM-CNR", "target": "ACTION-BLOQUEO", "relation": "ALLOWS_ACTION"}
+{"source": "CLAIM-CNR", "target": "ACTION-CREAR-CASO", "relation": "ALLOWS_ACTION"}
+{"source": "ACTION-BLOQUEO", "target": "ROLE-ASESOR", "relation": "REQUIRES_CONFIRMATION_BY"}
+{"source": "ACTION-CREAR-CASO", "target": "ROLE-ASESOR", "relation": "REQUIRES_CONFIRMATION_BY"}
+{"source": "ROLE-SUPERVISOR", "target": "MATRIZ-RIESGO-CB", "relation": "CAN_ACCESS"}
+{"source": "ROLE-ASESOR", "target": "POL-RECLAMOS-TC-V3", "relation": "CAN_ACCESS"}

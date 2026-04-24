@@ -1,0 +1,3 @@
+customer_id,name,segment,risk_level,consent_status,email,national_id
+C-1023,Carlos Andrade Sintético,preferente,medio,active,carlos.synthetic@example.com,1712345678
+C-2048,Ana Pérez Sintética,masivo,bajo,active,ana.synthetic@example.com,1722222222

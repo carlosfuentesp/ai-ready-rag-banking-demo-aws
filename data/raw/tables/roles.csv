@@ -1,0 +1,4 @@
+role,can_access_public,can_access_internal,can_access_restricted,can_execute_action
+cliente,true,false,false,false
+asesor,true,true,false,true
+supervisor,true,true,true,true

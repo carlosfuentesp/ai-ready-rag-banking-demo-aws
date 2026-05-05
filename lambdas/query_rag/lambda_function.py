@@ -18,6 +18,11 @@ GENERATION_MODEL_ID = os.environ.get("GENERATION_MODEL_ID", "anthropic.claude-3-
 TRANSACTIONS_TABLE = os.environ.get("TRANSACTIONS_TABLE", "")
 PRODUCTS_TABLE = os.environ.get("PRODUCTS_TABLE", "")
 CUSTOMERS_TABLE = os.environ.get("CUSTOMERS_TABLE", "")
+GRAPH_NODES_TABLE = os.environ.get("GRAPH_NODES_TABLE", "")
+GRAPH_EDGES_TABLE = os.environ.get("GRAPH_EDGES_TABLE", "")
+LINEAGE_TABLE = os.environ.get("LINEAGE_TABLE", "")
+GUARDRAIL_ID = os.environ.get("GUARDRAIL_ID", "")
+GUARDRAIL_VERSION = os.environ.get("GUARDRAIL_VERSION", "")
 
 
 def response(status_code: int, body: dict[str, Any]) -> dict[str, Any]:
@@ -54,6 +59,19 @@ def get_item(table_name: str, key: dict[str, str]) -> dict[str, Any] | None:
     return dict(item) if item else None
 
 
+def scan_table(table_name: str) -> list[dict[str, Any]]:
+    if not table_name:
+        return []
+    table = dynamodb.Table(table_name)
+    items: list[dict[str, Any]] = []
+    response = table.scan()
+    items.extend(response.get("Items", []))
+    while "LastEvaluatedKey" in response:
+        response = table.scan(ExclusiveStartKey=response["LastEvaluatedKey"])
+        items.extend(response.get("Items", []))
+    return [dict(item) for item in items]
+
+
 def structured_context(question: str, customer_id: str | None = None) -> dict[str, Any]:
     transaction_id = find_id(r"\bTX-\d+\b", question)
     if not customer_id:
@@ -80,6 +98,59 @@ def structured_context(question: str, customer_id: str | None = None) -> dict[st
         "transaction": transaction,
         "product": product,
         "customer": customer,
+    }
+
+
+def graph_context(question: str, structured: dict[str, Any]) -> dict[str, Any]:
+    seed_ids = {
+        match.group(0).upper()
+        for match in re.finditer(r"\b(?:TX|C|P-[A-Z]+)-[A-Z0-9]+\b", question, flags=re.IGNORECASE)
+    }
+    for key in ("transaction", "product", "customer"):
+        item = structured.get(key) or {}
+        for value_key in ("transaction_id", "product_id", "customer_id"):
+            if item.get(value_key):
+                seed_ids.add(str(item[value_key]))
+    if not seed_ids:
+        seed_ids.add("CLAIM-CNR")
+
+    nodes = scan_table(GRAPH_NODES_TABLE)
+    edges = scan_table(GRAPH_EDGES_TABLE)
+    node_by_id = {str(node.get("node_id")): node for node in nodes}
+
+    frontier = set(seed_ids)
+    visited = set(seed_ids)
+    selected_edges = []
+    for _ in range(4):
+        next_frontier = set()
+        for edge in edges:
+            source = str(edge.get("source"))
+            target = str(edge.get("target"))
+            if source in frontier or target in frontier:
+                selected_edges.append(edge)
+                if source not in visited:
+                    next_frontier.add(source)
+                if target not in visited:
+                    next_frontier.add(target)
+                visited.update([source, target])
+        frontier = next_frontier
+        if not frontier:
+            break
+
+    selected_nodes = [node_by_id[node_id] for node_id in sorted(visited) if node_id in node_by_id]
+    lineage = []
+    for event in scan_table(LINEAGE_TABLE):
+        raw = json.loads(event.get("raw_json", "{}"))
+        outputs = set(raw.get("outputs", []))
+        inputs = set(raw.get("inputs", []))
+        if visited.intersection(outputs) or visited.intersection(inputs):
+            lineage.append(raw)
+
+    return {
+        "seed_ids": sorted(seed_ids),
+        "nodes": selected_nodes,
+        "edges": selected_edges[:20],
+        "lineage_events": lineage,
     }
 
 
@@ -115,8 +186,41 @@ def compact_sources(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sources
 
 
-def build_prompt(mode: str, question: str, sources: list[dict[str, Any]], structured: dict[str, Any]) -> tuple[str, str]:
-    context = json.dumps({"sources": sources, "structured_data": structured}, ensure_ascii=False, default=str)
+def blocked_by_guardrail(question: str) -> str | None:
+    if not GUARDRAIL_ID or not GUARDRAIL_VERSION:
+        return None
+    try:
+        result = bedrock_runtime.apply_guardrail(
+            guardrailIdentifier=GUARDRAIL_ID,
+            guardrailVersion=GUARDRAIL_VERSION,
+            source="INPUT",
+            content=[{"text": {"text": question}}],
+        )
+    except Exception:
+        return None
+
+    if result.get("action") == "GUARDRAIL_INTERVENED":
+        outputs = result.get("outputs") or []
+        for output in outputs:
+            text = output.get("text")
+            if text:
+                return str(text)
+        return "No puedo procesar esta solicitud por políticas de seguridad."
+    return None
+
+
+def build_prompt(
+    mode: str,
+    question: str,
+    sources: list[dict[str, Any]],
+    structured: dict[str, Any],
+    graph: dict[str, Any],
+) -> tuple[str, str]:
+    context = json.dumps(
+        {"sources": sources, "structured_data": structured, "graph_context": graph},
+        ensure_ascii=False,
+        default=str,
+    )
     if mode == "basic":
         system = (
             "Eres el modo Basic RAG de una demo bancaria sintética. Solo puedes usar fragmentos recuperados desde PDFs raw. "
@@ -127,7 +231,7 @@ def build_prompt(mode: str, question: str, sources: list[dict[str, Any]], struct
         )
     else:
         system = (
-            "Eres el modo AI-Ready GraphRAG + Agent de una demo bancaria sintética. Usa fuentes recuperadas, metadata, relaciones de grafo y datos estructurados. "
+            "Eres el modo AI-Ready GraphRAG + Agent de una demo bancaria sintética. Usa fuentes recuperadas desde Bedrock Knowledge Bases GraphRAG con Neptune Analytics, metadata, relaciones de grafo, lineage y datos estructurados. "
             "Filtra mentalmente por producto, país EC, vigencia, rol y confidencialidad. No reveles matriz interna, score de contracargo ni umbral de fraude al cliente. "
             "Si la pregunta está fuera del dominio de reclamos por consumo no reconocido en tarjeta de crédito, responde que no tienes información suficiente. "
             "Si propones crear caso o bloqueo preventivo, indica que requiere confirmación humana y auditoría."
@@ -153,12 +257,13 @@ def generate(system: str, user: str) -> str:
             }
         ],
     }
-    result = bedrock_runtime.invoke_model(
-        modelId=GENERATION_MODEL_ID,
-        body=json.dumps(body),
-        accept="application/json",
-        contentType="application/json",
-    )
+    invoke_kwargs = {
+        "modelId": GENERATION_MODEL_ID,
+        "body": json.dumps(body),
+        "accept": "application/json",
+        "contentType": "application/json",
+    }
+    result = bedrock_runtime.invoke_model(**invoke_kwargs)
     payload = json.loads(result["body"].read())
     return "".join(part.get("text", "") for part in payload.get("content", []) if part.get("type") == "text")
 
@@ -176,12 +281,28 @@ def lambda_handler(event, context):
         if not question:
             return response(400, {"error": "question is required"})
 
+        guardrail_message = blocked_by_guardrail(question)
+        if guardrail_message:
+            return response(
+                200,
+                {
+                    "mode": mode,
+                    "answer": guardrail_message,
+                    "sources": [],
+                    "structured_data": {},
+                    "graph_context": {},
+                    "retrieval_count": 0,
+                    "guardrail_action": "blocked_input",
+                },
+            )
+
         customer_id = str(body.get("customer_id", "")).strip() or None
         kb_id = BASIC_KB_ID if mode == "basic" else AI_READY_KB_ID
         retrieved = retrieve(kb_id, question)
         sources = compact_sources(retrieved)
         structured = structured_context(question, customer_id) if mode == "ai-ready" else {}
-        system, user = build_prompt(mode, question, sources, structured)
+        graph = graph_context(question, structured) if mode == "ai-ready" else {}
+        system, user = build_prompt(mode, question, sources, structured, graph)
         answer = generate(system, user)
         return response(
             200,
@@ -190,6 +311,7 @@ def lambda_handler(event, context):
                 "answer": answer,
                 "sources": sources,
                 "structured_data": structured,
+                "graph_context": graph,
                 "retrieval_count": len(retrieved),
             },
         )

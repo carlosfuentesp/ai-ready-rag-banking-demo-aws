@@ -16,6 +16,12 @@ data "archive_file" "query_rag" {
   output_path = "${path.module}/.terraform/query_rag.zip"
 }
 
+data "archive_file" "start_ingestion" {
+  type        = "zip"
+  source_dir  = "${path.module}/../../lambdas/start_ingestion"
+  output_path = "${path.module}/.terraform/start_ingestion.zip"
+}
+
 resource "aws_lambda_function" "create_claim_case" {
   function_name    = "${local.name_prefix}-create-claim-case"
   role             = aws_iam_role.lambda_exec.arn
@@ -66,12 +72,73 @@ resource "aws_lambda_function" "query_rag" {
       TRANSACTIONS_TABLE  = aws_dynamodb_table.tables["transactions"].name
       PRODUCTS_TABLE      = aws_dynamodb_table.tables["products"].name
       CUSTOMERS_TABLE     = aws_dynamodb_table.tables["customers"].name
+      GRAPH_NODES_TABLE   = aws_dynamodb_table.tables["graph_nodes"].name
+      GRAPH_EDGES_TABLE   = aws_dynamodb_table.tables["graph_edges"].name
+      LINEAGE_TABLE       = aws_dynamodb_table.tables["lineage_events"].name
+      GUARDRAIL_ID        = var.enable_bedrock_guardrail ? aws_bedrock_guardrail.banking[0].guardrail_id : ""
+      GUARDRAIL_VERSION   = var.enable_bedrock_guardrail ? aws_bedrock_guardrail.banking[0].version : ""
     }
   }
 
   depends_on = [
     aws_iam_role_policy.lambda_rag_access,
     aws_bedrockagent_data_source.basic_rag,
-    aws_bedrockagent_data_source.graphrag,
+    aws_cloudformation_stack.graphrag_data_source,
   ]
+}
+
+resource "aws_lambda_function" "start_ingestion" {
+  function_name    = "${local.name_prefix}-start-ingestion"
+  role             = aws_iam_role.lambda_exec.arn
+  handler          = "lambda_function.lambda_handler"
+  runtime          = "python3.11"
+  filename         = data.archive_file.start_ingestion.output_path
+  source_code_hash = data.archive_file.start_ingestion.output_base64sha256
+  timeout          = 900
+
+  environment {
+    variables = {
+      DEFAULT_WAIT_SECONDS = tostring(var.ingestion_wait_seconds)
+    }
+  }
+
+  depends_on = [aws_iam_role_policy.lambda_ingestion_access]
+}
+
+resource "aws_lambda_invocation" "basic_rag_ingestion" {
+  count = var.enable_basic_rag && var.auto_start_ingestion_jobs ? 1 : 0
+
+  function_name = aws_lambda_function.start_ingestion.function_name
+  input = jsonencode({
+    knowledge_base_id = aws_bedrockagent_knowledge_base.basic_rag[0].id
+    data_source_id    = aws_bedrockagent_data_source.basic_rag[0].data_source_id
+    wait_seconds      = var.ingestion_wait_seconds
+  })
+
+  triggers = {
+    knowledge_base_id = aws_bedrockagent_knowledge_base.basic_rag[0].id
+    data_source_id    = aws_bedrockagent_data_source.basic_rag[0].data_source_id
+    raw_data_hash     = sha256(join("", [for _, object in aws_s3_object.raw_data : object.etag]))
+  }
+
+  depends_on = [aws_bedrockagent_data_source.basic_rag]
+}
+
+resource "aws_lambda_invocation" "graphrag_ingestion" {
+  count = var.enable_graphrag && var.auto_start_ingestion_jobs ? 1 : 0
+
+  function_name = aws_lambda_function.start_ingestion.function_name
+  input = jsonencode({
+    knowledge_base_id = aws_bedrockagent_knowledge_base.graphrag[0].id
+    data_source_id    = aws_cloudformation_stack.graphrag_data_source[0].outputs["DataSourceId"]
+    wait_seconds      = var.ingestion_wait_seconds
+  })
+
+  triggers = {
+    knowledge_base_id = aws_bedrockagent_knowledge_base.graphrag[0].id
+    data_source_id    = aws_cloudformation_stack.graphrag_data_source[0].outputs["DataSourceId"]
+    raw_data_hash     = sha256(join("", [for _, object in aws_s3_object.raw_data : object.etag]))
+  }
+
+  depends_on = [aws_cloudformation_stack.graphrag_data_source]
 }

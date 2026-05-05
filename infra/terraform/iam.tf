@@ -60,7 +60,7 @@ resource "aws_iam_role_policy" "bedrock_kb_policy" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat([
       {
         Effect = "Allow"
         Action = [
@@ -90,8 +90,16 @@ resource "aws_iam_role_policy" "bedrock_kb_policy" {
           "s3vectors:*"
         ]
         Resource = "*"
-      },
-    ]
+      }
+      ], var.enable_graphrag ? [
+      {
+        Effect = "Allow"
+        Action = [
+          "neptune-graph:*"
+        ]
+        Resource = aws_neptunegraph_graph.graphrag[0].arn
+      }
+    ] : [])
   })
 }
 
@@ -123,16 +131,37 @@ resource "aws_iam_role_policy" "lambda_rag_access" {
         Action = [
           "bedrock:InvokeModel",
           "bedrock:InvokeModelWithResponseStream",
-          "bedrock:Retrieve"
+          "bedrock:Retrieve",
+          "bedrock:ApplyGuardrail"
         ]
         Resource = "*"
       },
       {
         Effect = "Allow"
         Action = [
-          "dynamodb:GetItem"
+          "dynamodb:GetItem",
+          "dynamodb:Scan"
         ]
         Resource = [for t in aws_dynamodb_table.tables : t.arn]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "lambda_ingestion_access" {
+  name = "${local.name_prefix}-lambda-ingestion-access"
+  role = aws_iam_role.lambda_exec.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "bedrock:StartIngestionJob",
+          "bedrock:GetIngestionJob"
+        ]
+        Resource = "*"
       }
     ]
   })
